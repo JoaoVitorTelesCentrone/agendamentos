@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: agendamentos-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: bun install --frozen-lockfile
+    startCommand: bun run start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: BUN_VERSION
+        value: 1.3.9
+      - key: JWT_SECRET
+        sync: false
