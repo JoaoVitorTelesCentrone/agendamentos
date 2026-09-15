@@ -33,7 +33,7 @@ export function ServicosClient({
       {/* Formulário */}
       <form
         onSubmit={onSubmit}
-        className="flex h-fit flex-col gap-4 border border-border bg-card p-6"
+        className="flex h-fit flex-col gap-4 rounded-2xl border border-border/80 bg-card p-6 shadow-sm shadow-foreground/5"
       >
         <h2 className="font-medium">Novo serviço</h2>
         {error && (
@@ -77,7 +77,7 @@ export function ServicosClient({
             Nenhum serviço ainda. Cadastre o primeiro ao lado.
           </p>
         ) : (
-          <ul className="divide-y divide-border border border-border">
+          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border/80 shadow-sm">
             {initialServices.map((s) => (
               <li key={s.id} className="flex items-center gap-3 bg-card p-4">
                 <div className="min-w-0 flex-1">

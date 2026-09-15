@@ -61,7 +61,7 @@ export function ProfissionaisClient({
     <div className="flex flex-col gap-8">
       <form
         onSubmit={onSubmit}
-        className="flex flex-wrap items-end gap-3 border border-border bg-card p-6"
+        className="flex flex-wrap items-end gap-3 rounded-2xl border border-border/80 bg-card p-6 shadow-sm shadow-foreground/5"
       >
         <div className="min-w-56 flex-1">
           <Field label="Nome do profissional" name="name" placeholder="Ana" required />
@@ -111,7 +111,7 @@ function ProfessionalCard({
   const [pending, startTransition] = useTransition()
 
   return (
-    <div className="border border-border bg-card">
+    <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm shadow-foreground/5">
       <div className="flex items-center gap-3 p-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">

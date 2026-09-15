@@ -260,7 +260,7 @@ export default async function InsightsPage({
             Ainda sem dados. Eles aparecem conforme os agendamentos acontecem.
           </p>
         ) : (
-          <ul className="divide-y divide-border border border-border">
+          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border/80 shadow-sm">
             {topServices.map((s) => (
               <li key={s.name} className="bg-card p-4">
                 <div className="flex items-center justify-between gap-3 text-sm">
@@ -313,7 +313,7 @@ export default async function InsightsPage({
               </div>
             )}
 
-            <div className="overflow-x-auto border border-border bg-card">
+            <div className="overflow-x-auto rounded-2xl border border-border/80 bg-card shadow-sm">
               <div className="grid min-w-[34rem] grid-cols-[4.5rem_repeat(7,1fr)] text-sm">
                 <div className="p-3" />
                 {WEEKDAY_COLS.map((w, i) => (
@@ -429,7 +429,7 @@ export default async function InsightsPage({
                     href={`https://wa.me/55${c.whatsapp.replace(/\D/g, "")}?text=${reactivationMessage(c.name)}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:opacity-90"
+                    className="shrink-0 rounded-xl bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:opacity-90"
                   >
                     Chamar no WhatsApp
                   </a>
@@ -460,7 +460,7 @@ function Kpi({
   hint: string
 }) {
   return (
-    <div className="border border-border bg-card p-6">
+    <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm shadow-foreground/5">
       <div className="flex items-center gap-2 text-muted-foreground">
         {icon}
         <span className="text-sm">{label}</span>

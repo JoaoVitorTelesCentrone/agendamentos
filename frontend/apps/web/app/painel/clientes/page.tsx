@@ -124,7 +124,7 @@ export default async function ClientesPage({
             name="q"
             defaultValue={q}
             placeholder="Buscar por nome ou WhatsApp"
-            className="h-10 w-full rounded-md border border-input bg-card pr-3 pl-9 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-ring/25"
+            className="h-11 w-full rounded-xl border border-input bg-card pr-3 pl-9 text-sm outline-none transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/60 focus-visible:ring-4 focus-visible:ring-ring/20"
           />
         </form>
         <div className="flex flex-wrap gap-2">
@@ -149,7 +149,7 @@ export default async function ClientesPage({
               : "Ainda sem clientes. Eles aparecem aqui após o primeiro agendamento."}
           </p>
         ) : (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border/80 shadow-sm">
             {pageItems.map((c) => (
               <li key={c.id} className="flex items-center gap-3 bg-card p-4">
                 <div className="min-w-0 flex-1">

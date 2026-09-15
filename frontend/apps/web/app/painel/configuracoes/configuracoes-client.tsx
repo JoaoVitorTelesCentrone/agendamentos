@@ -108,7 +108,7 @@ export function ConfiguracoesClient({
     <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
       <div className="flex flex-col gap-8">
         {/* Logo */}
-        <section className="border border-border bg-card p-6">
+        <section className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm shadow-foreground/5">
           <h2 className="font-medium">Logo do estabelecimento</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Aparece no topo da sua página pública de agendamento.
@@ -154,7 +154,7 @@ export function ConfiguracoesClient({
         </section>
 
         {/* Tema */}
-        <section className="border border-border bg-card p-6">
+        <section className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm shadow-foreground/5">
           <h2 className="font-medium">Tema de cores</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             A cor dos botões e destaques que seus clientes veem ao agendar.
@@ -225,7 +225,7 @@ export function ConfiguracoesClient({
         <p className="mb-2 text-xs font-medium tracking-wide text-muted-foreground">
           PRÉVIA DA PÁGINA PÚBLICA
         </p>
-        <div className="overflow-hidden rounded-lg border border-border shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-border/80 shadow-lg shadow-foreground/5">
           <div className="flex flex-col items-center gap-3 border-b border-border bg-card px-6 py-8 text-center">
             <div className="flex size-16 items-center justify-center overflow-hidden rounded-2xl border border-border bg-background">
               {logoShown ? (

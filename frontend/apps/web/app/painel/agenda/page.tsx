@@ -98,7 +98,7 @@ export default async function AgendaPage() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
+    <div className="rounded-2xl border border-border/80 bg-card px-3 py-2 shadow-sm shadow-foreground/5">
       <div className="font-heading text-lg leading-none text-foreground">{value}</div>
       <div className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
         {label}
