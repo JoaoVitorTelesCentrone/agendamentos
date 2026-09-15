@@ -15,6 +15,9 @@ import {
 import { Button } from "@workspace/ui/components/button"
 import { HoverLift, Reveal } from "@/components/ui/motion-primitives"
 import { ThemeToggle } from "@/components/theme-provider"
+import { BorderBeam } from "@/components/ui/magicui-border-beam"
+import { MagicCard } from "@/components/ui/magicui-magic-card"
+import { ShimmerCta } from "@/components/ui/magicui-shimmer-cta"
 
 const SIGNUP_HREF = "/cadastro"
 const LOGIN_HREF = "/entrar"
@@ -152,7 +155,8 @@ function HeroMock() {
   ]
   return (
     <div className="flex flex-col gap-3">
-      <div className="brand-glow overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-xl shadow-primary/10 backdrop-blur-sm">
+      <MagicCard className="brand-glow rounded-2xl shadow-xl shadow-primary/10" gradientColor="color-mix(in oklch, var(--primary) 11%, transparent)">
+        <div className="overflow-hidden rounded-[inherit] bg-card/95 backdrop-blur-sm">
         <div className="flex items-center justify-between border-b border-border bg-muted/50 px-5 py-4">
           <div className="flex items-center gap-2 text-sm font-medium">
             <CalendarCheck className="size-4" />
@@ -184,7 +188,9 @@ function HeroMock() {
             </li>
           ))}
         </ul>
-      </div>
+        </div>
+        <BorderBeam size={90} duration={7} colorFrom="var(--primary)" colorTo="var(--warm)" />
+      </MagicCard>
 
       <div className="flex items-center gap-3 rounded-2xl border border-warm/30 bg-accent/35 p-4 shadow-lg shadow-warm/10">
         <Wallet className="size-5 shrink-0 text-money" />
@@ -329,11 +335,13 @@ function Features() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
             <HoverLift key={f.title} className="h-full">
-            <div className="group flex h-full flex-col gap-4 rounded-2xl border border-border/80 bg-card p-7 shadow-sm transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10">
+            <MagicCard className="h-full rounded-2xl" gradientSize={180} gradientColor="color-mix(in oklch, var(--primary) 10%, transparent)">
+            <div className="group flex h-full flex-col gap-4 bg-card p-7 shadow-sm transition-all hover:shadow-lg hover:shadow-primary/10">
               <f.icon className="size-5 text-primary" />
               <h3 className="font-heading text-lg font-semibold tracking-tight">{f.title}</h3>
               <p className="text-sm text-pretty text-muted-foreground">{f.desc}</p>
             </div>
+            </MagicCard>
             </HoverLift>
           ))}
         </div>
@@ -618,12 +626,10 @@ function FinalCta() {
           ainda esta semana.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button asChild size="lg">
-            <Link href={SIGNUP_HREF}>
+          <ShimmerCta href={SIGNUP_HREF}>
               Criar minha agenda grátis
               <ArrowRight className="size-4" data-icon="inline-end" />
-            </Link>
-          </Button>
+          </ShimmerCta>
           <Button asChild size="lg" variant="outline">
             <Link href={LOGIN_HREF}>Entrar</Link>
           </Button>

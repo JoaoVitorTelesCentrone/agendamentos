@@ -38,6 +38,8 @@ yarn-error.log*
 .pnpm-debug.log*
 .local-dev*.log
 .next-dev-*.log
+screenshots/
+.playwright-mcp/
 
 # vercel
 .vercel
