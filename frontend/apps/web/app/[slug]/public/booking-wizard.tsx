@@ -174,9 +174,9 @@ export function BookingWizard({
   // ---- Confirmação --------------------------------------------------------
   if (done) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+        <div className="brand-glow rounded-3xl border border-success/30 bg-card p-8 text-center shadow-xl shadow-success/10">
         <span
-          className="mx-auto flex size-14 items-center justify-center rounded-full text-white"
+          className="mx-auto flex size-14 items-center justify-center rounded-full bg-success text-white shadow-lg shadow-success/25"
           style={{ backgroundColor: brand }}
         >
           <Check className="size-7" />
@@ -226,7 +226,7 @@ export function BookingWizard({
               <li key={s.id}>
                 <button
                   onClick={() => setService(s)}
-                  className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/60 hover:bg-muted"
+                   className="group flex w-full items-center justify-between gap-3 rounded-2xl border border-border/80 bg-card p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/60 hover:bg-secondary/35 hover:shadow-md"
                 >
                   <div className="min-w-0">
                     <div className="font-medium">{s.name}</div>
@@ -263,7 +263,7 @@ export function BookingWizard({
                       setProfessional(p)
                       void loadSlots(date, p, service)
                     }}
-                    className="group flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary/60 hover:bg-muted"
+                     className="group flex w-full items-center gap-3 rounded-2xl border border-border/80 bg-card p-3 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/60 hover:bg-secondary/35 hover:shadow-md"
                   >
                     <Avatar name={p.name} brand={brand} />
                     <span className="flex-1 font-medium">{p.name}</span>
@@ -296,7 +296,7 @@ export function BookingWizard({
                 setDate(e.target.value)
                 void loadSlots(e.target.value, professional, service)
               }}
-              className="h-11 rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-ring/25"
+               className="h-11 rounded-xl border border-input bg-card px-3 text-sm outline-none transition-all focus-visible:border-primary/60 focus-visible:ring-4 focus-visible:ring-ring/20"
             />
           </label>
 
@@ -327,7 +327,7 @@ export function BookingWizard({
                             setPhase("form")
                             setError(null)
                           }}
-                          className="flex items-center justify-center gap-1 rounded-md border border-border bg-card py-2.5 text-sm transition-colors hover:border-primary/60 hover:bg-muted"
+                           className="flex items-center justify-center gap-1 rounded-xl border border-border/80 bg-card py-2.5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/60 hover:bg-secondary/50 hover:shadow-sm"
                         >
                           {s.label}
                         </button>
@@ -350,7 +350,7 @@ export function BookingWizard({
             Enviamos um código para {contact.whatsapp}.
           </p>
           {devCode && (
-            <p className="mb-4 rounded-md border border-dashed border-border bg-muted/50 px-3 py-2 text-sm">
+             <p className="mb-4 rounded-xl border border-dashed border-warm/40 bg-accent/25 px-3 py-2 text-sm">
               Modo teste — seu código é <strong>{devCode}</strong>.
             </p>
           )}

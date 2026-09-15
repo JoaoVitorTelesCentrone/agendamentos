@@ -1,8 +1,14 @@
 "use client"
 
 import * as React from "react"
+import { Moon, Sun } from "lucide-react"
 
 type Theme = "light" | "dark"
+
+const ThemeContext = React.createContext<{
+  theme: Theme | null
+  setTheme: React.Dispatch<React.SetStateAction<Theme | null>>
+} | null>(null)
 
 function getSystemTheme(): Theme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
@@ -30,10 +36,33 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme])
 
   return (
-    <>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       <ThemeHotkey theme={theme} setTheme={setTheme} />
       {children}
-    </>
+    </ThemeContext.Provider>
+  )
+}
+
+function useTheme() {
+  const context = React.useContext(ThemeContext)
+  if (!context) throw new Error("useTheme must be used within ThemeProvider")
+  return context
+}
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  if (!theme) return null
+  const dark = theme === "dark"
+  return (
+    <button
+      type="button"
+      aria-label={dark ? "Ativar tema claro" : "Ativar tema escuro"}
+      title={dark ? "Tema claro" : "Tema escuro"}
+      onClick={() => setTheme(dark ? "light" : "dark")}
+      className="inline-flex size-10 items-center justify-center rounded-xl border border-border/80 bg-card/70 text-muted-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-secondary/60 hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/20"
+    >
+      {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+    </button>
   )
 }
 
@@ -88,4 +117,4 @@ function ThemeHotkey({
   return null
 }
 
-export { ThemeProvider }
+export { ThemeProvider, ThemeToggle, useTheme }

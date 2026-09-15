@@ -32,6 +32,30 @@ export function MotionLi(props: HTMLMotionProps<"li">) {
   return <motion.li variants={fadeUp} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} {...props} />
 }
 
+/** A self-contained reveal for pages that don't need a motion parent. */
+export function Reveal({ delay = 0, ...props }: HTMLMotionProps<"div"> & { delay?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      {...props}
+    />
+  )
+}
+
+export function Pressable(props: HTMLMotionProps<"div">) {
+  return (
+    <motion.div
+      whileHover={{ y: -3 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: "spring", stiffness: 420, damping: 26 }}
+      {...props}
+    />
+  )
+}
+
 export function HoverLift(props: HTMLMotionProps<"div">) {
   return (
     <motion.div

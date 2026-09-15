@@ -1,6 +1,5 @@
 ﻿"use client"
 
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -26,26 +25,21 @@ const items = [
 
 export function PainelNav({ slug }: { slug: string }) {
   const pathname = usePathname()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   return (
     <nav className="flex shrink-0 gap-1 overflow-x-auto md:flex-col md:overflow-visible">
       {items.map((item) => {
-        const active = mounted && (item.exact
+        const active = item.exact
           ? pathname === item.href
-          : pathname.startsWith(item.href))
+          : pathname.startsWith(item.href)
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2.5 text-sm transition-colors ${
+            className={`group flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm transition-all duration-200 hover:translate-x-0.5 ${
               active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                : "text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
             }`}
           >
             <item.icon className="size-4 shrink-0" />
@@ -57,7 +51,7 @@ export function PainelNav({ slug }: { slug: string }) {
         href={`/${slug}/public`}
         target="_blank"
         rel="noreferrer"
-        className="mt-1 flex items-center gap-2 whitespace-nowrap rounded-md border border-border px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:mt-3"
+            className="mt-1 flex items-center gap-2 whitespace-nowrap rounded-xl border border-border/80 px-3 py-2.5 text-sm text-muted-foreground transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-secondary/50 hover:text-foreground md:mt-3"
       >
         <ExternalLink className="size-4 shrink-0" />
         Pagina publica

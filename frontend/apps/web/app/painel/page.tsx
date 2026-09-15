@@ -62,7 +62,7 @@ export default async function PainelPage() {
       <span className="text-xs tracking-widest text-muted-foreground uppercase">
         Painel
       </span>
-      <h1 className="mt-2 font-heading text-3xl tracking-tight">
+      <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight">
         Bem-vindo, {tenant.name}
       </h1>
       <p className="mt-2 max-w-md text-muted-foreground">
@@ -75,9 +75,9 @@ export default async function PainelPage() {
             <Link
               key={step.label}
               href={step.href}
-              className="flex gap-4 bg-card p-6 transition-colors hover:bg-muted"
+              className="group flex gap-4 bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:bg-secondary/35"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted/50">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-secondary/70 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                 <step.icon className="size-4" />
               </span>
               <div className="min-w-0 flex-1">
@@ -126,7 +126,7 @@ export default async function PainelPage() {
         />
       </div>
 
-      <div className="mt-8 rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+      <div className="mt-8 rounded-2xl border border-warm/25 bg-accent/25 p-4 text-sm text-muted-foreground">
         Sua agenda esta no plano <strong>{tenant.plan}</strong> · status{" "}
         <strong>{tenant.status}</strong>.
       </div>

@@ -31,13 +31,14 @@ export default async function PublicPage({
     // Sobrescreve o token --primary com o tema do tenant: tudo que usa
     // text-primary/bg-primary na página pública segue a cor escolhida.
     <div
-      className="flex min-h-svh flex-col bg-background"
+      className="relative flex min-h-svh flex-col overflow-hidden bg-background"
       style={{ "--primary": brand } as React.CSSProperties}
     >
       {/* Hero */}
-      <header className="border-b border-border bg-card">
+      <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-96 opacity-50" />
+      <header className="relative border-b border-border/70 bg-card/75 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-lg flex-col items-center px-6 py-12 text-center">
-          <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl border border-border bg-background shadow-sm">
+          <div className="brand-glow flex size-20 items-center justify-center overflow-hidden rounded-3xl border border-border/80 bg-background shadow-xl">
             {tenant.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={tenant.logo_url} alt={tenant.name} className="size-full object-cover" />
@@ -47,7 +48,7 @@ export default async function PublicPage({
               </span>
             )}
           </div>
-          <h1 className="mt-5 font-heading text-4xl font-bold tracking-tight">{tenant.name}</h1>
+          <h1 className="mt-5 font-heading text-4xl font-semibold tracking-tight">{tenant.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">Agende seu horário online</p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
@@ -60,11 +61,11 @@ export default async function PublicPage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-xl flex-1 px-4 py-8">
+      <main className="relative z-10 mx-auto w-full max-w-xl flex-1 px-4 py-8 sm:py-12">
         {bookable ? (
           <PublicCatalog slug={slug} tenantId={tenant.id} brand={brand} />
         ) : (
-          <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-10 text-center shadow-sm">
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-border/80 bg-card p-10 text-center shadow-lg shadow-foreground/5">
             <CalendarX className="size-8 text-muted-foreground" />
             <p className="text-muted-foreground">
               Agenda temporariamente indisponível. Tente novamente mais tarde.
@@ -93,7 +94,7 @@ async function PublicCatalog({
 
   if (services.length === 0 || professionals.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card p-10 text-center text-muted-foreground shadow-sm">
+        <div className="rounded-2xl border border-border/80 bg-card p-10 text-center text-muted-foreground shadow-lg shadow-foreground/5">
         Este salão ainda está configurando a agenda. Volte em breve.
       </div>
     )
