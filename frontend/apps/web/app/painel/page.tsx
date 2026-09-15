@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 import {
   Scissors,
   Users,
@@ -9,6 +9,7 @@ import {
 
 import { createClient } from "@/lib/supabase/server"
 import { requireContext } from "@/lib/tenant"
+import { ActivitiesCard } from "@/components/ui/activities-card"
 
 export default async function PainelPage() {
   const { tenant } = await requireContext()
@@ -28,15 +29,15 @@ export default async function PainelPage() {
   const checklist = [
     {
       icon: Scissors,
-      label: "Cadastrar serviços",
-      desc: "Nome, duração e preço de cada serviço.",
+      label: "Cadastrar servicos",
+      desc: "Nome, duracao e preco de cada servico.",
       href: "/painel/servicos",
       done: hasServices,
     },
     {
       icon: Users,
       label: "Cadastrar profissionais",
-      desc: "Sua equipe e os horários de trabalho.",
+      desc: "Sua equipe e os horarios de trabalho.",
       href: "/painel/profissionais",
       done: hasProfessionals,
     },
@@ -65,40 +66,68 @@ export default async function PainelPage() {
         Bem-vindo, {tenant.name}
       </h1>
       <p className="mt-2 max-w-md text-muted-foreground">
-        Complete o checklist abaixo para colocar seu salão no ar.
+        Complete o checklist abaixo para colocar seu salao no ar.
       </p>
 
-      <div className="mt-8 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2">
-        {checklist.map((step, i) => (
-          <Link
-            key={step.label}
-            href={step.href}
-            className="flex gap-4 bg-card p-6 transition-colors hover:bg-muted/50"
-          >
-            <span className="flex size-9 shrink-0 items-center justify-center border border-border">
-              <step.icon className="size-4" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium">{step.label}</h3>
-                {step.done ? (
-                  <CheckCircle2 className="size-4 text-primary" />
-                ) : (
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {i + 1}/4
-                  </span>
-                )}
+      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_22rem]">
+        <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
+          {checklist.map((step, i) => (
+            <Link
+              key={step.label}
+              href={step.href}
+              className="flex gap-4 bg-card p-6 transition-colors hover:bg-muted"
+            >
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted/50">
+                <step.icon className="size-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium">{step.label}</h3>
+                  {step.done ? (
+                    <CheckCircle2 className="size-4 text-primary" />
+                  ) : (
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {i + 1}/4
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 truncate text-sm text-muted-foreground">
+                  {step.desc}
+                </p>
               </div>
-              <p className="mt-1 truncate text-sm text-muted-foreground">
-                {step.desc}
-              </p>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
+
+        <ActivitiesCard
+          headerIcon={<CalendarCheck className="size-7" />}
+          title="Rotina do dia"
+          subtitle="Proximos passos"
+          activities={[
+            {
+              icon: <Scissors className="size-4" />,
+              title: "Servicos",
+              desc: hasServices ? "Catalogo configurado" : "Cadastre seu primeiro servico",
+              time: hasServices ? "ok" : "agora",
+            },
+            {
+              icon: <Users className="size-4" />,
+              title: "Equipe",
+              desc: hasProfessionals ? "Profissionais ativos" : "Adicione sua equipe",
+              time: hasProfessionals ? "ok" : "agora",
+            },
+            {
+              icon: <Link2 className="size-4" />,
+              title: "Link publico",
+              desc: `/${tenant.slug}/public`,
+              time: "24/7",
+            },
+          ]}
+        />
       </div>
 
-      <div className="mt-8 border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-        Sua agenda está no plano <strong>{tenant.plan}</strong> · status{" "}
+      <div className="mt-8 rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+        Sua agenda esta no plano <strong>{tenant.plan}</strong> · status{" "}
         <strong>{tenant.status}</strong>.
       </div>
     </div>

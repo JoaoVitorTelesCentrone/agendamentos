@@ -99,9 +99,12 @@ export async function createAppointment(input: {
     tenantName: tenant.name,
     appointmentId: appt.id,
     whatsapp,
+    clientName: name,
     serviceName: service.name,
     proName: professional?.name ?? "seu profissional",
     startsAt: start.toISOString(),
+    durationMin: service.duration_min,
+    priceCents: service.price_cents,
   })
 
   revalidatePath("/painel/agenda")
@@ -173,9 +176,12 @@ export async function rescheduleAppointment(
       tenantName: tenant.name,
       appointmentId: id,
       whatsapp: client.clients.whatsapp,
+      clientName: "Cliente",
       serviceName: service.name,
       proName: professional?.name ?? "seu profissional",
       startsAt: start.toISOString(),
+      durationMin: service.duration_min,
+      priceCents: 0,
     })
   }
 
@@ -189,9 +195,12 @@ async function notify(info: {
   tenantName: string
   appointmentId: string
   whatsapp: string
+  clientName: string
   serviceName: string
   proName: string
   startsAt: string
+  durationMin: number
+  priceCents: number
 }) {
   try {
     await enqueueBookingNotifications(info)

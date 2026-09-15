@@ -1,9 +1,8 @@
 import "server-only"
 
 import { createAdminClient } from "@/lib/supabase/admin"
-import { sendWhatsappMessage } from "@/lib/whatsapp"
+import { sendWhatsappMessage, sendWhatsappTemplate } from "@/lib/whatsapp"
 
-// Lembretes anti-no-show: 24h e 2h antes do horário.
 const REMINDER_OFFSETS_MIN = [24 * 60, 2 * 60]
 
 function formatDateTime(iso: string): string {
@@ -17,13 +16,31 @@ function formatDateTime(iso: string): string {
   }).format(new Date(iso))
 }
 
+function formatCurrency(cents: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(cents / 100)
+}
+
 function confirmationBody(p: {
   tenantName: string
+  clientName: string
   serviceName: string
   proName: string
   startsAt: string
+  durationMin: number
+  priceCents: number
 }): string {
-  return `${p.tenantName}: seu horário está confirmado! ${p.serviceName} com ${p.proName} em ${formatDateTime(p.startsAt)}. Precisando remarcar, é só chamar aqui. 💜`
+  return [
+    `${p.tenantName}: agendamento confirmado!`,
+    `Cliente: ${p.clientName}`,
+    `Servico: ${p.serviceName}`,
+    `Profissional: ${p.proName}`,
+    `Data e horario: ${formatDateTime(p.startsAt)}`,
+    `Duracao: ${p.durationMin} min`,
+    `Valor: ${formatCurrency(p.priceCents)}`,
+  ].join("\n")
 }
 
 function reminderBody(p: {
@@ -32,7 +49,7 @@ function reminderBody(p: {
   proName: string
   startsAt: string
 }): string {
-  return `${p.tenantName}: lembrete do seu horário — ${p.serviceName} com ${p.proName} em ${formatDateTime(p.startsAt)}. Consegue confirmar que vem? Se não puder, avisa pra gente liberar a vaga. 🙏`
+  return `${p.tenantName}: lembrete do seu horario - ${p.serviceName} com ${p.proName} em ${formatDateTime(p.startsAt)}. Consegue confirmar que vem? Se nao puder, avisa pra gente liberar a vaga.`
 }
 
 type BookingInfo = {
@@ -40,16 +57,28 @@ type BookingInfo = {
   tenantName: string
   appointmentId: string
   whatsapp: string
+  clientName: string
   serviceName: string
   proName: string
-  startsAt: string // ISO
+  startsAt: string
+  durationMin: number
+  priceCents: number
 }
 
-// Enfileira confirmação (agora) + lembretes (24h e 2h antes, se ainda no futuro).
 export async function enqueueBookingNotifications(info: BookingInfo) {
   const admin = createAdminClient()
   const start = new Date(info.startsAt).getTime()
   const now = Date.now()
+
+  const payload = JSON.stringify({
+    tenantName: info.tenantName,
+    clientName: info.clientName,
+    serviceName: info.serviceName,
+    proName: info.proName,
+    startsAt: info.startsAt,
+    durationMin: info.durationMin,
+    priceCents: info.priceCents,
+  })
 
   const rows: {
     tenant_id: string
@@ -57,6 +86,7 @@ export async function enqueueBookingNotifications(info: BookingInfo) {
     type: "confirmation" | "reminder"
     to_whatsapp: string
     body: string
+    payload: string
     scheduled_for: string
   }[] = [
     {
@@ -65,6 +95,7 @@ export async function enqueueBookingNotifications(info: BookingInfo) {
       type: "confirmation",
       to_whatsapp: info.whatsapp,
       body: confirmationBody(info),
+      payload,
       scheduled_for: new Date().toISOString(),
     },
   ]
@@ -78,6 +109,7 @@ export async function enqueueBookingNotifications(info: BookingInfo) {
         type: "reminder",
         to_whatsapp: info.whatsapp,
         body: reminderBody(info),
+        payload,
         scheduled_for: new Date(when).toISOString(),
       })
     }
@@ -86,7 +118,6 @@ export async function enqueueBookingNotifications(info: BookingInfo) {
   await admin.from("notifications").insert(rows)
 }
 
-// Cancela avisos ainda não enviados de um agendamento (ao cancelar/remarcar).
 export async function clearPendingNotifications(appointmentId: string) {
   const admin = createAdminClient()
   await admin
@@ -96,16 +127,43 @@ export async function clearPendingNotifications(appointmentId: string) {
     .eq("status", "pending")
 }
 
+type NotificationPayload = {
+  tenantName: string
+  clientName?: string
+  serviceName: string
+  proName: string
+  startsAt: string
+  durationMin?: number
+  priceCents?: number
+}
+
 type DueRow = {
   id: string
   type: "confirmation" | "reminder"
   to_whatsapp: string
   body: string
+  payload: NotificationPayload | null
   appointments: { status: string } | null
 }
 
-// Processa notificações vencidas: envia e marca sent/failed/cancelled.
-// Chamado tanto inline após o agendamento (confirmação imediata) quanto pelo cron.
+function dispatch(n: DueRow) {
+  const contentSid =
+    n.type === "confirmation"
+      ? process.env.TWILIO_TEMPLATE_CONFIRMATION_SID
+      : process.env.TWILIO_TEMPLATE_REMINDER_SID
+
+  if (contentSid && n.payload) {
+    const variables = {
+      "1": n.payload.tenantName,
+      "2": n.payload.serviceName,
+      "3": n.payload.proName,
+      "4": formatDateTime(n.payload.startsAt),
+    }
+    return sendWhatsappTemplate(n.to_whatsapp, contentSid, variables, n.body)
+  }
+  return sendWhatsappMessage(n.to_whatsapp, n.body)
+}
+
 export async function processDueNotifications(limit = 50): Promise<{
   sent: number
   failed: number
@@ -116,7 +174,7 @@ export async function processDueNotifications(limit = 50): Promise<{
 
   const { data: due } = await admin
     .from("notifications")
-    .select("id, type, to_whatsapp, body, appointments(status)")
+    .select("id, type, to_whatsapp, body, payload, appointments(status)")
     .eq("status", "pending")
     .lte("scheduled_for", nowIso)
     .order("scheduled_for", { ascending: true })
@@ -128,7 +186,6 @@ export async function processDueNotifications(limit = 50): Promise<{
   let skipped = 0
 
   for (const n of due ?? []) {
-    // Lembrete só faz sentido se o agendamento continua de pé.
     const status = n.appointments?.status
     if (
       n.type === "reminder" &&
@@ -144,7 +201,7 @@ export async function processDueNotifications(limit = 50): Promise<{
     }
 
     try {
-      const res = await sendWhatsappMessage(n.to_whatsapp, n.body)
+      const res = await dispatch(n)
       if (res.delivered) {
         await admin
           .from("notifications")

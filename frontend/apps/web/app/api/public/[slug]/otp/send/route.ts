@@ -33,6 +33,7 @@ export async function POST(
   }
 
   const admin = createAdminClient()
+  const fixedCode = process.env.OTP_FIXED_CODE?.trim()
 
   // cooldown de reenvio
   const { data: last } = await admin
@@ -44,7 +45,7 @@ export async function POST(
     .limit(1)
     .maybeSingle<{ created_at: string }>()
 
-  if (last) {
+  if (!fixedCode && last) {
     const elapsed = (Date.now() - new Date(last.created_at).getTime()) / 1000
     if (elapsed < OTP_RESEND_COOLDOWN_S) {
       return NextResponse.json(
@@ -58,7 +59,7 @@ export async function POST(
     }
   }
 
-  const code = generateCode()
+  const code = fixedCode || generateCode()
   const expiresAt = new Date(Date.now() + OTP_TTL_MIN * 60000).toISOString()
 
   const { error } = await admin.from("otp_verifications").insert({

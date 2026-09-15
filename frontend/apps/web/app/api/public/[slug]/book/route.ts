@@ -167,9 +167,12 @@ export async function POST(
       tenantName: tenant.name,
       appointmentId: appt.id,
       whatsapp,
+      clientName: name,
       serviceName: service.name,
       proName: professional?.name ?? "seu profissional",
       startsAt: start.toISOString(),
+      durationMin: service.duration_min,
+      priceCents: service.price_cents,
     })
     await processDueNotifications() // dispara a confirmação na hora
   } catch (e) {

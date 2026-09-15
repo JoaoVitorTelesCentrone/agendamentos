@@ -42,17 +42,65 @@ const STATUS_STYLE: Record<ApptStatus, string> = {
   no_show: "bg-destructive/10 text-destructive",
 }
 
-function startOfWeek(d: Date): Date {
+type CalendarView = "day" | "week" | "month"
+
+const TIME_ZONE = "America/Sao_Paulo"
+
+function startOfDay(d: Date): Date {
   const x = new Date(d)
-  x.setHours(0, 0, 0, 0)
-  const day = (x.getDay() + 6) % 7 // segunda = 0
+  x.setHours(12, 0, 0, 0)
+  return x
+}
+function startOfWeek(d: Date): Date {
+  const x = startOfDay(d)
+  const day = (x.getDay() + 6) % 7
   x.setDate(x.getDate() - day)
+  return x
+}
+function startOfMonth(d: Date): Date {
+  const x = startOfDay(d)
+  x.setDate(1)
   return x
 }
 function addDays(d: Date, n: number): Date {
   const x = new Date(d)
   x.setDate(x.getDate() + n)
   return x
+}
+function addMonths(d: Date, n: number): Date {
+  const x = startOfDay(d)
+  x.setDate(1)
+  x.setMonth(x.getMonth() + n)
+  return x
+}
+function formatDate(d: Date, options: Intl.DateTimeFormatOptions): string {
+  return d.toLocaleDateString("pt-BR", { ...options, timeZone: TIME_ZONE })
+}
+function getRangeLabel(date: Date, view: CalendarView): string {
+  if (view === "day") {
+    return formatDate(date, {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+    })
+  }
+  if (view === "month") {
+    return formatDate(date, {
+      month: "long",
+      year: "numeric",
+    })
+  }
+  const weekStart = startOfWeek(date)
+  const weekEnd = addDays(weekStart, 6)
+  return `${formatDate(weekStart, {
+    day: "2-digit",
+    month: "short",
+  })} - ${formatDate(weekEnd, { day: "2-digit", month: "short" })}`
+}
+function shiftDate(date: Date, view: CalendarView, direction: number): Date {
+  if (view === "day") return addDays(date, direction)
+  if (view === "month") return addMonths(date, direction)
+  return addDays(date, direction * 7)
 }
 
 export function AgendaClient({
@@ -71,18 +119,15 @@ export function AgendaClient({
     null
   )
   const [selected, setSelected] = useState<AppointmentRow | null>(null)
-  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()))
+  const [view, setView] = useState<CalendarView>("week")
+  const [visibleDate, setVisibleDate] = useState(() => startOfDay(new Date()))
 
   const hasPro = professionals.length > 0
   const hasService = services.length > 0
   const canCreate = hasService && hasPro
   const needsSetup = !canCreate
 
-  const weekEnd = addDays(weekStart, 6)
-  const rangeLabel = `${weekStart.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-  })} – ${weekEnd.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}`
+  const rangeLabel = getRangeLabel(visibleDate, view)
 
   return (
     <div>
@@ -90,33 +135,48 @@ export function AgendaClient({
         <OnboardingSetup hasPro={hasPro} hasService={hasService} />
       ) : (
         <>
-          {/* barra de navegação */}
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setWeekStart(startOfWeek(new Date()))}
-              >
-                Hoje
-              </Button>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                aria-label="Semana anterior"
-                onClick={() => setWeekStart(addDays(weekStart, -7))}
-              >
-                <ChevronLeft className="size-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                aria-label="Próxima semana"
-                onClick={() => setWeekStart(addDays(weekStart, 7))}
-              >
-                <ChevronRight className="size-4" />
-              </Button>
-              <span className="ml-2 text-sm font-medium capitalize text-muted-foreground">
+          <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="inline-flex w-fit rounded-md border border-border bg-card p-1">
+                {(["day", "week", "month"] as CalendarView[]).map((item) => (
+                  <Button
+                    key={item}
+                    type="button"
+                    variant={view === item ? "default" : "ghost"}
+                    size="xs"
+                    onClick={() => setView(item)}
+                    className="min-w-16"
+                  >
+                    {item === "day" ? "Dia" : item === "week" ? "Semana" : "Mes"}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setVisibleDate(startOfDay(new Date()))}
+                >
+                  Hoje
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label="Periodo anterior"
+                  onClick={() => setVisibleDate((date) => shiftDate(date, view, -1))}
+                >
+                  <ChevronLeft className="size-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label="Proximo periodo"
+                  onClick={() => setVisibleDate((date) => shiftDate(date, view, 1))}
+                >
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+              <span className="text-sm font-medium capitalize text-muted-foreground">
                 {rangeLabel}
               </span>
             </div>
@@ -127,7 +187,8 @@ export function AgendaClient({
           </div>
 
           <WeekCalendar
-            weekStart={weekStart}
+            view={view}
+            date={visibleDate}
             appointments={appointments}
             onSelect={(a) => setSelected(a)}
           />
@@ -189,7 +250,7 @@ function EventDetail({
 
   const start = new Date(appt.starts_at)
   const end = new Date(appt.ends_at)
-  const dateLabel = start.toLocaleDateString("pt-BR", {
+  const dateLabel = formatDate(start, {
     weekday: "long",
     day: "2-digit",
     month: "long",
@@ -197,7 +258,12 @@ function EventDetail({
   const timeLabel = `${start.toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
-  })} – ${end.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`
+    timeZone: TIME_ZONE,
+  })} - ${end.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: TIME_ZONE,
+  })}`
 
   function setStatus(status: ApptStatus) {
     startTransition(() =>

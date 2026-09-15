@@ -48,7 +48,7 @@ export function ServicosClient({
             name="duration_min"
             type="number"
             min={1}
-            step={5}
+            step={1}
             placeholder="45"
             required
           />

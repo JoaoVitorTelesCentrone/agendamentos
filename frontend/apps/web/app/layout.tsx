@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Noto_Sans, Playfair_Display } from "next/font/google"
+import { Archivo, Geist_Mono, Instrument_Sans } from "next/font/google"
 
 import "@workspace/ui/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -11,9 +11,9 @@ export const metadata: Metadata = {
     "Agenda inteligente para salões e barbearias. Seus clientes agendam sozinhos pelo link, o CRM se preenche a cada horário e você vê quem sumiu — sem trabalho manual.",
 }
 
-const playfairDisplayHeading = Playfair_Display({subsets:['latin'],variable:'--font-heading'});
+const archivoHeading = Archivo({ subsets: ["latin"], variable: "--font-heading" })
 
-const notoSans = Noto_Sans({subsets:['latin'],variable:'--font-sans'})
+const instrumentSans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans" })
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -29,7 +29,7 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", notoSans.variable, playfairDisplayHeading.variable)}
+      className={cn("antialiased", fontMono.variable, "font-sans", instrumentSans.variable, archivoHeading.variable)}
     >
       <body>
         <ThemeProvider>{children}</ThemeProvider>

@@ -7,6 +7,8 @@ export async function register(input: {
   nome: string
   email: string
   password: string
+  /** nicho vindo do diagnóstico (/quiz) — semeia serviços e expediente */
+  niche?: string
 }): Promise<{ slug: string }> {
   let res: Response
   try {

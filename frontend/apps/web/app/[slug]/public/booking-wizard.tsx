@@ -19,6 +19,7 @@ import type { Slot } from "@/lib/availability"
 type Link = { service_id: string; professional_id: string }
 
 const STEPS = ["Serviço", "Profissional", "Horário", "Dados"]
+const TEST_WHATSAPP = "11975811215"
 
 function todayIso(): string {
   const d = new Date()
@@ -100,20 +101,21 @@ export function BookingWizard({
 
   // Passo 4a — envia o OTP e vai para o passo de código
   async function sendOtp(name: string, whatsapp: string) {
+    const targetWhatsapp = TEST_WHATSAPP || whatsapp
     setError(null)
     setBusy(true)
     try {
       const res = await fetch(`/api/public/${slug}/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ whatsapp }),
+        body: JSON.stringify({ whatsapp: targetWhatsapp }),
       })
       const data = (await res.json()) as { ok?: boolean; devCode?: string; error?: string }
       if (!res.ok || !data.ok) {
         setError(data.error ?? "Não foi possível enviar o código.")
         return
       }
-      setContact({ name, whatsapp })
+      setContact({ name, whatsapp: targetWhatsapp })
       setDevCode(data.devCode ?? null)
       setPhase("otp")
     } catch {
@@ -172,7 +174,7 @@ export function BookingWizard({
   // ---- Confirmação --------------------------------------------------------
   if (done) {
     return (
-      <div className="border border-border bg-card p-8 text-center">
+      <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
         <span
           className="mx-auto flex size-14 items-center justify-center rounded-full text-white"
           style={{ backgroundColor: brand }}
@@ -224,7 +226,7 @@ export function BookingWizard({
               <li key={s.id}>
                 <button
                   onClick={() => setService(s)}
-                  className="group flex w-full items-center justify-between gap-3 border border-border bg-card p-4 text-left transition-colors hover:border-primary"
+                  className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/60 hover:bg-muted"
                 >
                   <div className="min-w-0">
                     <div className="font-medium">{s.name}</div>
@@ -261,7 +263,7 @@ export function BookingWizard({
                       setProfessional(p)
                       void loadSlots(date, p, service)
                     }}
-                    className="group flex w-full items-center gap-3 border border-border bg-card p-3 text-left transition-colors hover:border-primary"
+                    className="group flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary/60 hover:bg-muted"
                   >
                     <Avatar name={p.name} brand={brand} />
                     <span className="flex-1 font-medium">{p.name}</span>
@@ -294,7 +296,7 @@ export function BookingWizard({
                 setDate(e.target.value)
                 void loadSlots(e.target.value, professional, service)
               }}
-              className="h-10 border border-input bg-background px-3 text-sm"
+              className="h-11 rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-ring/25"
             />
           </label>
 
@@ -325,7 +327,7 @@ export function BookingWizard({
                             setPhase("form")
                             setError(null)
                           }}
-                          className="flex items-center justify-center gap-1 border border-border bg-card py-2 text-sm transition-colors hover:border-primary"
+                          className="flex items-center justify-center gap-1 rounded-md border border-border bg-card py-2.5 text-sm transition-colors hover:border-primary/60 hover:bg-muted"
                         >
                           {s.label}
                         </button>
@@ -348,7 +350,7 @@ export function BookingWizard({
             Enviamos um código para {contact.whatsapp}.
           </p>
           {devCode && (
-            <p className="mb-4 border border-dashed border-border bg-muted/40 px-3 py-2 text-sm">
+            <p className="mb-4 rounded-md border border-dashed border-border bg-muted/50 px-3 py-2 text-sm">
               Modo teste — seu código é <strong>{devCode}</strong>.
             </p>
           )}
@@ -402,8 +404,7 @@ export function BookingWizard({
               e.preventDefault()
               const form = new FormData(e.currentTarget)
               const name = String(form.get("name") ?? "").trim()
-              const whatsapp = String(form.get("whatsapp") ?? "").trim()
-              void sendOtp(name, whatsapp)
+              void sendOtp(name, TEST_WHATSAPP)
             }}
             className="flex flex-col gap-4"
           >
@@ -415,7 +416,9 @@ export function BookingWizard({
               type="tel"
               inputMode="tel"
               placeholder="(11) 99999-9999"
-              hint="Enviaremos um código para confirmar o número."
+              value={TEST_WHATSAPP}
+              readOnly
+              hint="Seu WhatsApp de teste conectado ao Sandbox."
               required
             />
             <Button
@@ -478,7 +481,7 @@ function Steps({ current, brand }: { current: number; brand: string }) {
 function Avatar({ name, brand }: { name: string; brand: string }) {
   return (
     <span
-      className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+      className="flex size-10 shrink-0 items-center justify-center rounded-xl text-sm font-semibold text-primary-foreground shadow-sm"
       style={{ backgroundColor: brand }}
     >
       {initials(name)}
@@ -495,12 +498,12 @@ function Recap({
 }) {
   return (
     <div className="mb-4 flex flex-wrap gap-2 text-xs">
-      <span className="inline-flex items-center gap-1 border border-border bg-muted/40 px-2 py-1">
+      <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2.5 py-1">
         <CalendarDays className="size-3" />
         {service.name} · {formatPrice(service.price_cents)}
       </span>
       {professional && (
-        <span className="inline-flex items-center gap-1 border border-border bg-muted/40 px-2 py-1">
+        <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2.5 py-1">
           <User className="size-3" />
           {professional.name}
         </span>
@@ -512,7 +515,7 @@ function Recap({
 function SummaryBar({ text }: { text: string }) {
   if (!text) return null
   return (
-    <p className="mb-4 border-l-2 border-primary bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+    <p className="mb-4 rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
       {text}
     </p>
   )
@@ -539,7 +542,7 @@ function SummaryRow({
 
 function ErrorBox({ message }: { message: string }) {
   return (
-    <p className="border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+    <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
       {message}
     </p>
   )
@@ -555,8 +558,8 @@ function Panel({
   children: React.ReactNode
 }) {
   return (
-    <div className="border border-border bg-background p-5">
-      <div className="mb-4 flex items-center gap-2">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <div className="mb-5 flex items-center gap-2">
         {onBack && (
           <button
             onClick={onBack}
@@ -599,14 +602,14 @@ function NoSlots({ slug, serviceId }: { slug: string; serviceId: string }) {
 
   if (sent) {
     return (
-      <p className="border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+      <p className="rounded-xl border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
         Prontinho! Assim que abrir um horário a gente te avisa.
       </p>
     )
   }
 
   return (
-    <div className="border border-dashed border-border p-4">
+    <div className="rounded-xl border border-dashed border-border bg-card p-4">
       <p className="mb-3 text-sm text-muted-foreground">
         Sem horários nesse dia. Deixe seu WhatsApp que avisamos quando abrir vaga.
       </p>

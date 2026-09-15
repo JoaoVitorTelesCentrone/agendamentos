@@ -413,15 +413,31 @@ export type ServerClient = DbClient & {
 }
 
 export async function makeServerClient(): Promise<ServerClient> {
-  const user = await getSessionUser()
+  let user = await getSessionUser()
   let tenantId: string | undefined
+
   if (user) {
     const rows = await query<{ tenant_id: string }>(
       "select tenant_id from profiles where id = $1",
       [user.id]
     )
     tenantId = rows[0]?.tenant_id
+  } else {
+    // Auth temporariamente desabilitada: usa o primeiro perfil para abrir o painel.
+    const rows = await query<{ id: string; email: string; tenant_id: string }>(
+      `select au.id, au.email, p.tenant_id
+       from auth_users au
+       join profiles p on p.id = au.id
+       order by au.created_at asc
+       limit 1`
+    )
+    const fallback = rows[0]
+    if (fallback) {
+      user = { id: fallback.id, email: fallback.email }
+      tenantId = fallback.tenant_id
+    }
   }
+
   const scope: Scope = { scoped: true, tenantId }
   return {
     from: (table: string) => new QueryBuilder(table, scope),

@@ -1,23 +1,39 @@
 "use client"
 
 import * as React from "react"
-import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
-function ThemeProvider({
-  children,
-  ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
+type Theme = "light" | "dark"
+
+function getSystemTheme(): Theme {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.classList.toggle("dark", theme === "dark")
+  document.documentElement.style.colorScheme = theme
+}
+
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = React.useState<Theme | null>(null)
+
+  React.useEffect(() => {
+    const stored = window.localStorage.getItem("theme")
+    const initial = stored === "light" || stored === "dark" ? stored : getSystemTheme()
+    setTheme(initial)
+    applyTheme(initial)
+  }, [])
+
+  React.useEffect(() => {
+    if (!theme) return
+    window.localStorage.setItem("theme", theme)
+    applyTheme(theme)
+  }, [theme])
+
   return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-      {...props}
-    >
-      <ThemeHotkey />
+    <>
+      <ThemeHotkey theme={theme} setTheme={setTheme} />
       {children}
-    </NextThemesProvider>
+    </>
   )
 }
 
@@ -34,9 +50,13 @@ function isTypingTarget(target: EventTarget | null) {
   )
 }
 
-function ThemeHotkey() {
-  const { resolvedTheme, setTheme } = useTheme()
-
+function ThemeHotkey({
+  theme,
+  setTheme,
+}: {
+  theme: Theme | null
+  setTheme: React.Dispatch<React.SetStateAction<Theme | null>>
+}) {
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.defaultPrevented || event.repeat) {
@@ -47,7 +67,7 @@ function ThemeHotkey() {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      if (typeof event.key !== "string" || event.key.toLowerCase() !== "d") {
         return
       }
 
@@ -55,7 +75,7 @@ function ThemeHotkey() {
         return
       }
 
-      setTheme(resolvedTheme === "dark" ? "light" : "dark")
+      setTheme((current) => (current ?? theme ?? getSystemTheme()) === "dark" ? "light" : "dark")
     }
 
     window.addEventListener("keydown", onKeyDown)
@@ -63,7 +83,7 @@ function ThemeHotkey() {
     return () => {
       window.removeEventListener("keydown", onKeyDown)
     }
-  }, [resolvedTheme, setTheme])
+  }, [setTheme, theme])
 
   return null
 }

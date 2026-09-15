@@ -2,9 +2,8 @@ import { notFound } from "next/navigation"
 import { CalendarX, MapPin, ShieldCheck } from "lucide-react"
 
 import { getPublicTenant, getPublicCatalog, BOOKABLE_STATUS } from "@/lib/public-data"
+import { DEFAULT_BRAND } from "@/lib/themes"
 import { BookingWizard } from "./booking-wizard"
-
-const DEFAULT_BRAND = "#1d4ed8"
 
 function initials(name: string): string {
   return name
@@ -29,30 +28,28 @@ export default async function PublicPage({
   const brand = tenant.primary_color || DEFAULT_BRAND
 
   return (
-    <div className="flex min-h-svh flex-col bg-muted/20">
+    // Sobrescreve o token --primary com o tema do tenant: tudo que usa
+    // text-primary/bg-primary na página pública segue a cor escolhida.
+    <div
+      className="flex min-h-svh flex-col bg-background"
+      style={{ "--primary": brand } as React.CSSProperties}
+    >
       {/* Hero */}
-      <header className="relative overflow-hidden text-white" style={{ backgroundColor: brand }}>
-        <div
-          className="pointer-events-none absolute inset-0 opacity-20"
-          style={{
-            background:
-              "radial-gradient(circle at 20% 20%, rgba(255,255,255,.6), transparent 40%), radial-gradient(circle at 80% 0%, rgba(255,255,255,.35), transparent 45%)",
-          }}
-        />
-        <div className="relative mx-auto flex w-full max-w-lg flex-col items-center px-6 py-12 text-center">
-          <div className="flex size-20 items-center justify-center overflow-hidden rounded-full bg-white/95 shadow-sm">
+      <header className="border-b border-border bg-card">
+        <div className="mx-auto flex w-full max-w-lg flex-col items-center px-6 py-12 text-center">
+          <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl border border-border bg-background shadow-sm">
             {tenant.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={tenant.logo_url} alt={tenant.name} className="size-full object-cover" />
             ) : (
-              <span className="font-heading text-2xl" style={{ color: brand }}>
+              <span className="font-heading text-2xl text-primary">
                 {initials(tenant.name)}
               </span>
             )}
           </div>
-          <h1 className="mt-4 font-heading text-3xl tracking-tight">{tenant.name}</h1>
-          <p className="mt-1 text-sm text-white/80">Agende seu horário online</p>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-white/70">
+          <h1 className="mt-5 font-heading text-4xl font-bold tracking-tight">{tenant.name}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Agende seu horário online</p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <ShieldCheck className="size-3.5" /> Confirmação por WhatsApp
             </span>
@@ -63,11 +60,11 @@ export default async function PublicPage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
+      <main className="mx-auto w-full max-w-xl flex-1 px-4 py-8">
         {bookable ? (
           <PublicCatalog slug={slug} tenantId={tenant.id} brand={brand} />
         ) : (
-          <div className="flex flex-col items-center gap-3 border border-border bg-card p-10 text-center">
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-10 text-center shadow-sm">
             <CalendarX className="size-8 text-muted-foreground" />
             <p className="text-muted-foreground">
               Agenda temporariamente indisponível. Tente novamente mais tarde.
@@ -76,7 +73,7 @@ export default async function PublicPage({
         )}
       </main>
 
-      <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
+      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
         Agendamento online • {tenant.name}
       </footer>
     </div>
@@ -96,7 +93,7 @@ async function PublicCatalog({
 
   if (services.length === 0 || professionals.length === 0) {
     return (
-      <div className="border border-border bg-card p-10 text-center text-muted-foreground">
+      <div className="rounded-lg border border-border bg-card p-10 text-center text-muted-foreground shadow-sm">
         Este salão ainda está configurando a agenda. Volte em breve.
       </div>
     )

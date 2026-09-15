@@ -5,6 +5,7 @@
 --   * sem auth.uid()/current_tenant_id()
 -- Re-executável: derruba tudo e recria (destrutivo — use só em dev/seed).
 
+drop table if exists quiz_responses       cascade;
 drop table if exists notifications        cascade;
 drop table if exists otp_verifications    cascade;
 drop table if exists leads                cascade;
@@ -193,6 +194,9 @@ create table notifications (
   channel        text not null default 'whatsapp',
   to_whatsapp    text not null,
   body           text not null,
+  -- variáveis para reenviar via template Twilio (Content API) quando o
+  -- template estiver aprovado; body continua sendo o fallback em texto livre.
+  payload        jsonb,
   status         notification_status not null default 'pending',
   scheduled_for  timestamptz not null,
   sent_at        timestamptz,
@@ -201,3 +205,19 @@ create table notifications (
 );
 create index notifications_due_idx  on notifications(status, scheduled_for);
 create index notifications_appt_idx on notifications(appointment_id);
+
+-- Respostas do quiz de validação (funil público /quiz).
+-- NÃO é tenant-scoped: é um funil de marketing/descoberta, respostas globais.
+-- `answers` guarda o mapa pergunta→resposta em jsonb (schema flexível por quiz);
+-- name/whatsapp são a captura de lead pra follow-up de entrevista.
+create table quiz_responses (
+  id         uuid primary key default gen_random_uuid(),
+  quiz       text not null default 'agendamento',
+  answers    jsonb not null default '{}'::jsonb,
+  name       text,
+  whatsapp   text,
+  referrer   text,
+  user_agent text,
+  created_at timestamptz not null default now()
+);
+create index quiz_responses_created_idx on quiz_responses(quiz, created_at desc);

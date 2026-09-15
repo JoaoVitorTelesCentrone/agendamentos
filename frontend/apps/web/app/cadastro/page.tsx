@@ -1,18 +1,33 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useSyncExternalStore } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Wallet } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 import { AuthShell, TextField, FormError } from "@/components/auth-ui"
 import { register } from "@/lib/auth"
+import { formatBRL } from "@/lib/quiz-diagnosis"
+import {
+  clearHandoff,
+  getHandoffServerSnapshot,
+  getHandoffSnapshot,
+  subscribeHandoff,
+} from "@/lib/quiz-handoff"
 
 export default function CadastroPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Quem vem do diagnóstico chega com um número na cabeça. Repetir esse número
+  // aqui é o que mantém a promessa viva no ponto de maior fricção do funil.
+  const handoff = useSyncExternalStore(
+    subscribeHandoff,
+    getHandoffSnapshot,
+    getHandoffServerSnapshot
+  )
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -34,7 +49,8 @@ export default function CadastroPage() {
 
     setLoading(true)
     try {
-      await register({ salao, nome, email, password })
+      await register({ salao, nome, email, password, niche: handoff?.niche })
+      clearHandoff()
       router.refresh()
       router.push("/painel")
     } catch (err) {
@@ -43,10 +59,16 @@ export default function CadastroPage() {
     }
   }
 
+  const recovered = handoff?.recoveredMonthlyCents ?? 0
+
   return (
     <AuthShell
-      title="Crie sua agenda grátis"
-      subtitle="Configure seu salão em poucos minutos. Sem cartão de crédito."
+      title={recovered > 0 ? "Falta pouco pra recuperar isso" : "Crie sua agenda grátis"}
+      subtitle={
+        recovered > 0
+          ? "Quatro campos e sua agenda entra no ar — já com seus serviços cadastrados."
+          : "Configure seu salão em poucos minutos. Sem cartão de crédito."
+      }
       footer={
         <>
           Já tem conta?{" "}
@@ -56,6 +78,28 @@ export default function CadastroPage() {
         </>
       }
     >
+      {recovered > 0 && (
+        <div className="mb-5 flex items-start gap-3 rounded-lg border border-money/40 bg-money/[0.06] p-4">
+          <Wallet className="mt-0.5 size-4 shrink-0 text-money" />
+          <p className="text-sm leading-relaxed text-pretty">
+            Seu diagnóstico:{" "}
+            <span className="font-medium tabular-nums text-money">
+              {formatBRL(recovered)} por mês
+            </span>{" "}
+            de volta no seu caixa
+            {handoff && handoff.hoursSaved > 0 && (
+              <>
+                {" "}
+                — e{" "}
+                <span className="font-medium">{handoff.hoursSaved}h</span> que
+                param de ir embora no WhatsApp
+              </>
+            )}
+            . Começa agora.
+          </p>
+        </div>
+      )}
+
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <FormError message={error} />
         <TextField
@@ -92,7 +136,11 @@ export default function CadastroPage() {
           required
         />
         <Button type="submit" size="lg" className="mt-2 w-full" disabled={loading}>
-          {loading ? "Criando..." : "Criar minha agenda"}
+          {loading
+            ? "Criando..."
+            : recovered > 0
+              ? `Recuperar ${formatBRL(recovered)} por mês`
+              : "Criar minha agenda"}
           {!loading && <ArrowRight className="size-4" data-icon="inline-end" />}
         </Button>
       </form>

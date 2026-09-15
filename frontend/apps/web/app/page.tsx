@@ -3,14 +3,13 @@ import {
   CalendarCheck,
   Clock,
   Link2,
-  Mail,
   Scissors,
   ShieldCheck,
-  Sparkles,
   Users,
   BarChart3,
   CheckCircle2,
   ArrowRight,
+  Wallet,
 } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
@@ -44,7 +43,7 @@ export default function Page() {
 
 function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border bg-background">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
         <Logo />
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
@@ -76,11 +75,11 @@ function SiteHeader() {
 
 function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-2">
-      <span className="flex size-8 items-center justify-center bg-primary text-primary-foreground">
+    <Link href="/" className="flex items-center gap-2.5">
+      <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
         <Scissors className="size-4" />
       </span>
-      <span className="font-heading text-lg tracking-tight">VÍVIO</span>
+      <span className="font-heading text-lg font-bold tracking-tight">VÍVIO</span>
     </Link>
   )
 }
@@ -91,20 +90,20 @@ function Logo() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-border/60">
-      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:py-28">
+    <section className="border-b border-border">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.05fr_.95fr] lg:py-28">
         <div className="flex flex-col items-start gap-6">
-          <span className="inline-flex items-center gap-2 border border-border px-3 py-1 text-xs tracking-widest text-muted-foreground uppercase">
-            <Sparkles className="size-3.5" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium tracking-wide text-secondary-foreground">
             Para salões e barbearias
           </span>
-          <h1 className="font-heading text-4xl leading-[1.05] tracking-tight text-balance sm:text-5xl lg:text-6xl">
+          <h1 className="font-heading text-4xl leading-[1.04] font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
             Sua agenda lotada, sem WhatsApp travando o dia inteiro.
           </h1>
-          <p className="max-w-md text-lg text-muted-foreground text-pretty">
-            Seus clientes agendam sozinhos pelo link e confirmam pelo WhatsApp. A
-            cada horário, seu cadastro de clientes cresce sozinho e a VÍVIO te
-            avisa quem sumiu. Menos faltas, menos trabalho manual.
+          <p className="max-w-xl text-lg leading-8 text-muted-foreground text-pretty">
+            Seus clientes agendam sozinhos pelo link e confirmam pelo WhatsApp.
+            A cada horário, seu cadastro de clientes cresce sozinho e a VÍVIO te
+            mostra quem sumiu e quanto isso custa. Menos faltas, menos trabalho
+            manual.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
@@ -119,15 +118,15 @@ function Hero() {
           </div>
           <ul className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-1.5">
-              <CheckCircle2 className="size-4 text-foreground" />
+              <CheckCircle2 className="size-4 text-primary" />
               Sem cartão de crédito
             </li>
             <li className="flex items-center gap-1.5">
-              <CheckCircle2 className="size-4 text-foreground" />
+              <CheckCircle2 className="size-4 text-primary" />
               Pronto em 5 minutos
             </li>
             <li className="flex items-center gap-1.5">
-              <CheckCircle2 className="size-4 text-foreground" />
+              <CheckCircle2 className="size-4 text-primary" />
               Cancele quando quiser
             </li>
           </ul>
@@ -138,6 +137,7 @@ function Hero() {
   )
 }
 
+// Mock do painel: agenda do dia + o insight com cifrão — o motivo de assinar.
 function HeroMock() {
   const slots = [
     { time: "09:00", name: "Marina Alves", service: "Corte + Escova", pro: "Bia", status: "confirmado" },
@@ -146,10 +146,9 @@ function HeroMock() {
     { time: "15:00", name: "Disponível", service: "—", pro: "", status: "livre" },
   ]
   return (
-    <div className="relative">
-      <div className="absolute -inset-4 -z-10 bg-muted/50" aria-hidden />
-      <div className="border border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between border-b border-border px-5 py-3">
+    <div className="flex flex-col gap-3">
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="flex items-center justify-between border-b border-border bg-muted/50 px-5 py-4">
           <div className="flex items-center gap-2 text-sm font-medium">
             <CalendarCheck className="size-4" />
             Hoje · Segunda
@@ -181,13 +180,22 @@ function HeroMock() {
           ))}
         </ul>
       </div>
+
+      <div className="flex items-center gap-3 rounded-lg border border-money/40 bg-card p-4 shadow-sm">
+        <Wallet className="size-5 shrink-0 text-money" />
+        <p className="text-sm">
+          <span className="font-heading text-lg font-bold tabular-nums">R$ 1.240</span>{" "}
+          parados em <span className="font-medium">9 clientes que sumiram</span>.
+          Chame de volta com um clique.
+        </p>
+      </div>
     </div>
   )
 }
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    confirmado: "border-foreground/20 bg-foreground/5 text-foreground",
+    confirmado: "border-primary/30 bg-primary/10 text-primary",
     agendado: "border-border bg-muted text-muted-foreground",
     livre: "border-dashed border-border text-muted-foreground",
   }
@@ -198,7 +206,7 @@ function StatusBadge({ status }: { status: string }) {
   }
   return (
     <span
-      className={`shrink-0 border px-2 py-0.5 text-[10px] tracking-widest uppercase ${map[status]}`}
+      className={`shrink-0 rounded border px-2 py-0.5 text-[10px] tracking-widest uppercase ${map[status]}`}
     >
       {label[status]}
     </span>
@@ -216,11 +224,13 @@ function TrustStrip() {
     { value: "5 min", label: "para colocar seu salão no ar" },
   ]
   return (
-    <section className="border-b border-border/60 bg-muted/30">
+    <section className="border-b border-border bg-muted/40">
       <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-10 sm:grid-cols-3">
         {stats.map((s) => (
           <div key={s.label} className="text-center sm:text-left">
-            <p className="font-heading text-2xl tracking-tight">{s.value}</p>
+            <p className="font-heading text-2xl font-bold tracking-tight tabular-nums">
+              {s.value}
+            </p>
             <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
           </div>
         ))}
@@ -241,19 +251,19 @@ function Problem() {
     "Agenda no caderno ou na planilha que ninguém mais entende.",
   ]
   return (
-    <section className="border-b border-border/60">
+    <section className="border-b border-border">
       <div className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="max-w-2xl">
           <SectionLabel>O problema</SectionLabel>
-          <h2 className="mt-4 font-heading text-3xl tracking-tight text-balance sm:text-4xl">
+          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
             Gerenciar agenda no WhatsApp custa caro — em tempo e em cliente
             perdido.
           </h2>
         </div>
-        <ul className="mt-12 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2">
+        <ul className="mt-12 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2">
           {pains.map((p) => (
             <li key={p} className="flex gap-3 bg-card p-6">
-              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center border border-destructive/30 text-destructive">
+              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded border border-destructive/30 text-sm text-destructive">
                 ✕
               </span>
               <p className="text-pretty text-muted-foreground">{p}</p>
@@ -282,9 +292,9 @@ function Features() {
       desc: "Bloqueio automático de horário por profissional. Nada de dois clientes na mesma cadeira no mesmo minuto.",
     },
     {
-      icon: Mail,
-      title: "Confirmação por e-mail",
-      desc: "Cada agendamento dispara confirmação automática. Menos faltas, sem você precisar lembrar ninguém.",
+      icon: Wallet,
+      title: "Insights com cifrão",
+      desc: "Quem sumiu, quanto isso vale, e em que dia e horário sua cadeira fica vazia. Números para agir, não gráficos para enfeitar.",
     },
     {
       icon: Users,
@@ -303,22 +313,23 @@ function Features() {
     },
   ]
   return (
-    <section id="recursos" className="border-b border-border/60 bg-muted/30">
+    <section id="recursos" className="border-b border-border bg-muted/40">
       <div className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="max-w-2xl">
           <SectionLabel>Recursos</SectionLabel>
-          <h2 className="mt-4 font-heading text-3xl tracking-tight text-balance sm:text-4xl">
+          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
             Tudo que o salão precisa para organizar a agenda em um só lugar.
           </h2>
         </div>
-        <div className="mt-12 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
-            <div key={f.title} className="flex flex-col gap-3 bg-card p-7">
-              <f.icon className="size-5" />
+            <div
+              key={f.title}
+              className="flex flex-col gap-3 rounded-lg border border-border bg-card p-7 shadow-sm transition-colors hover:border-primary/40"
+            >
+              <f.icon className="size-5 text-primary" />
               <h3 className="font-medium">{f.title}</h3>
-              <p className="text-sm text-pretty text-muted-foreground">
-                {f.desc}
-              </p>
+              <p className="text-sm text-pretty text-muted-foreground">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -350,21 +361,19 @@ function HowItWorks() {
     },
   ]
   return (
-    <section id="como-funciona" className="border-b border-border/60">
+    <section id="como-funciona" className="border-b border-border">
       <div className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="max-w-2xl">
           <SectionLabel>Como funciona</SectionLabel>
-          <h2 className="mt-4 font-heading text-3xl tracking-tight text-balance sm:text-4xl">
+          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
             Do caos do WhatsApp para uma agenda organizada em 3 passos.
           </h2>
         </div>
         <div className="mt-12 grid gap-8 md:grid-cols-3">
           {steps.map((s) => (
-            <div key={s.n} className="border-t-2 border-foreground pt-6">
-              <span className="font-mono text-sm text-muted-foreground">
-                {s.n}
-              </span>
-              <h3 className="mt-2 font-heading text-xl tracking-tight">
+            <div key={s.n} className="border-t-2 border-primary pt-6">
+              <span className="font-mono text-sm text-muted-foreground">{s.n}</span>
+              <h3 className="mt-2 font-heading text-xl font-bold tracking-tight">
                 {s.title}
               </h3>
               <p className="mt-2 text-pretty text-muted-foreground">{s.desc}</p>
@@ -382,29 +391,29 @@ function HowItWorks() {
 
 function PublicLink() {
   return (
-    <section className="border-b border-border/60 bg-primary text-primary-foreground">
+    <section className="border-b border-border bg-muted/40">
       <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-6 py-20 lg:grid-cols-2">
         <div>
-          <span className="inline-flex items-center gap-2 border border-primary-foreground/20 px-3 py-1 text-xs tracking-widest uppercase opacity-80">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium tracking-wide text-secondary-foreground">
             <Clock className="size-3.5" />
             Funciona enquanto você atende
           </span>
-          <h2 className="mt-4 font-heading text-3xl tracking-tight text-balance sm:text-4xl">
+          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
             Enquanto você está com a tesoura na mão, sua agenda continua
             enchendo.
           </h2>
-          <p className="mt-4 max-w-md text-primary-foreground/80 text-pretty">
+          <p className="mt-4 max-w-md text-muted-foreground text-pretty">
             O link público trabalha por você 24 horas por dia. O cliente vê
             apenas os horários realmente livres e confirma na hora — sem
             telefone tocando, sem mensagem sem resposta.
           </p>
-          <Button asChild size="lg" variant="secondary" className="mt-8">
+          <Button asChild size="lg" className="mt-8">
             <Link href={SIGNUP_HREF}>Quero meu link de agendamento</Link>
           </Button>
         </div>
-        <div className="border border-primary-foreground/15 bg-primary-foreground/5 p-6">
-          <div className="flex items-center gap-2 border border-primary-foreground/15 bg-primary-foreground/10 px-3 py-2 font-mono text-sm">
-            <Link2 className="size-4 opacity-70" />
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 font-mono text-sm">
+            <Link2 className="size-4 text-muted-foreground" />
             vivio.app/seu-salao
           </div>
           <div className="mt-4 space-y-3">
@@ -415,10 +424,10 @@ function PublicLink() {
             ].map((item) => (
               <div
                 key={item}
-                className="flex items-center justify-between border border-primary-foreground/15 px-4 py-3 text-sm"
+                className="flex items-center justify-between rounded-md border border-border px-4 py-3 text-sm"
               >
-                <span>{item}</span>
-                <span className="text-xs tracking-widest uppercase opacity-70">
+                <span className="tabular-nums">{item}</span>
+                <span className="text-xs font-medium tracking-widest text-primary uppercase">
                   Agendar
                 </span>
               </div>
@@ -438,119 +447,86 @@ function Pricing() {
   const plans = [
     {
       name: "Starter",
-      tagline: "Para começar a organizar",
+      description: "Para começar a organizar",
       price: "R$ 49",
       features: [
         "1 unidade",
         "Até 3 profissionais",
-        "Até 300 agendamentos/mês",
-        "Link público + confirmação por e-mail",
-        "Dashboard básico",
+        "Link público de agendamento",
+        "Confirmação por WhatsApp",
       ],
       highlighted: false,
     },
     {
       name: "Pro",
-      tagline: "O mais escolhido por salões em crescimento",
+      description: "Para salões em crescimento",
       price: "R$ 129",
       features: [
         "Até 3 unidades",
         "Até 15 profissionais",
-        "Até 2.000 agendamentos/mês",
-        "Relatórios e personalização visual",
-        "Lembretes automáticos (em breve)",
+        "Insights e relatórios",
+        "Lembretes automáticos",
       ],
       highlighted: true,
     },
     {
       name: "Business",
-      tagline: "Para operações maiores",
+      description: "Para operações maiores",
       price: "R$ 299",
       features: [
         "Até 10 unidades",
         "Até 50 profissionais",
-        "Agendamentos em alto volume",
         "Permissões avançadas",
         "Suporte prioritário",
       ],
       highlighted: false,
     },
   ]
+
   return (
-    <section id="planos" className="border-b border-border/60 bg-muted/30">
+    <section id="planos" className="border-b border-border">
       <div className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="max-w-2xl">
           <SectionLabel>Planos</SectionLabel>
-          <h2 className="mt-4 font-heading text-3xl tracking-tight text-balance sm:text-4xl">
-            Preço simples. Comece grátis e suba de plano quando crescer.
+          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
+            Preço simples. Comece grátis e suba quando crescer.
           </h2>
         </div>
-        <div className="mt-12 grid gap-px overflow-hidden border border-border bg-border lg:grid-cols-3">
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
           {plans.map((p) => (
             <div
               key={p.name}
-              className={`flex flex-col gap-6 p-8 ${
-                p.highlighted ? "bg-primary text-primary-foreground" : "bg-card"
+              className={`flex flex-col rounded-lg border bg-card p-7 shadow-sm ${
+                p.highlighted ? "border-primary" : "border-border"
               }`}
             >
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-heading text-xl tracking-tight">
-                    {p.name}
-                  </h3>
-                  {p.highlighted && (
-                    <span className="border border-primary-foreground/30 px-2 py-0.5 text-[10px] tracking-widest uppercase">
-                      Popular
-                    </span>
-                  )}
-                </div>
-                <p
-                  className={`mt-1 text-sm ${
-                    p.highlighted
-                      ? "text-primary-foreground/70"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {p.tagline}
-                </p>
+              <div className="flex items-center justify-between">
+                <h3 className="font-heading text-xl font-bold tracking-tight">{p.name}</h3>
+                {p.highlighted && (
+                  <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-medium text-primary-foreground">
+                    Popular
+                  </span>
+                )}
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="font-heading text-4xl tracking-tight">
+              <p className="mt-1 text-sm text-muted-foreground">{p.description}</p>
+              <p className="mt-6">
+                <span className="font-heading text-4xl font-bold tracking-tight tabular-nums">
                   {p.price}
                 </span>
-                <span
-                  className={`text-sm ${
-                    p.highlighted
-                      ? "text-primary-foreground/70"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  /mês
-                </span>
-              </div>
-              <ul className="flex flex-1 flex-col gap-3 text-sm">
+                <span className="text-sm text-muted-foreground">/mês</span>
+              </p>
+              <ul className="mt-6 flex-1 space-y-2.5 text-sm">
                 {p.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <CheckCircle2
-                      className={`mt-0.5 size-4 shrink-0 ${
-                        p.highlighted ? "" : "text-foreground"
-                      }`}
-                    />
-                    <span
-                      className={
-                        p.highlighted ? "text-primary-foreground/90" : ""
-                      }
-                    >
-                      {f}
-                    </span>
+                  <li key={f} className="flex items-center gap-2">
+                    <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                    {f}
                   </li>
                 ))}
               </ul>
               <Button
                 asChild
-                size="lg"
-                variant={p.highlighted ? "secondary" : "default"}
-                className="w-full"
+                className="mt-8"
+                variant={p.highlighted ? "default" : "outline"}
               >
                 <Link href={SIGNUP_HREF}>Começar agora</Link>
               </Button>
@@ -558,8 +534,7 @@ function Pricing() {
           ))}
         </div>
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Todos os planos com teste grátis. Sem fidelidade. Cancele quando
-          quiser.
+          Teste grátis. Sem fidelidade. Cancele quando quiser.
         </p>
       </div>
     </section>
@@ -578,38 +553,46 @@ function Faq() {
     },
     {
       q: "Meus clientes precisam baixar um app?",
-      a: "Não. Eles abrem o seu link no celular ou computador, escolhem serviço e horário e pronto. Simples assim.",
+      a: "Não. Eles abrem o seu link no celular ou computador, escolhem serviço e horário e pronto.",
     },
     {
       q: "Funciona para barbearia também?",
-      a: "Sim. Foi feito para salões de beleza e barbearias: serviços com preço e duração, vários profissionais e agenda individual.",
+      a: "Sim. Foi feito para salões e barbearias: serviços com preço e duração, vários profissionais e agenda individual.",
     },
     {
       q: "E o WhatsApp e os lembretes?",
-      a: "No momento a confirmação é por e-mail. Lembretes automáticos e WhatsApp já estão no nosso roadmap e chegam em breve.",
+      a: "O cliente confirma o número por WhatsApp e recebe a confirmação do agendamento com os dados completos.",
     },
     {
       q: "Posso cancelar quando quiser?",
       a: "Pode. Não há fidelidade nem multa. Você assina mês a mês e cancela quando precisar.",
     },
   ]
+
   return (
-    <section id="faq" className="border-b border-border/60">
-      <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[1fr_2fr]">
+    <section id="faq" className="border-b border-border bg-muted/40">
+      <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-20 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
           <SectionLabel>Dúvidas</SectionLabel>
-          <h2 className="mt-4 font-heading text-3xl tracking-tight text-balance sm:text-4xl">
+          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
             Perguntas frequentes
           </h2>
         </div>
-        <dl className="divide-y divide-border border-t border-border">
+        <div className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
           {faqs.map((f) => (
-            <div key={f.q} className="py-5">
-              <dt className="font-medium">{f.q}</dt>
-              <dd className="mt-2 text-pretty text-muted-foreground">{f.a}</dd>
-            </div>
+            <details key={f.q} className="group">
+              <summary className="flex cursor-pointer items-center justify-between gap-4 p-5 text-sm font-medium transition-colors hover:bg-muted/50 [&::-webkit-details-marker]:hidden">
+                {f.q}
+                <span className="text-muted-foreground transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <p className="px-5 pb-5 text-sm leading-6 text-muted-foreground">
+                {f.a}
+              </p>
+            </details>
           ))}
-        </dl>
+        </div>
       </div>
     </section>
   )
@@ -621,9 +604,9 @@ function Faq() {
 
 function FinalCta() {
   return (
-    <section className="border-b border-border/60">
+    <section className="border-b border-border">
       <div className="mx-auto w-full max-w-6xl px-6 py-24 text-center">
-        <h2 className="mx-auto max-w-2xl font-heading text-4xl tracking-tight text-balance sm:text-5xl">
+        <h2 className="mx-auto max-w-2xl font-heading text-4xl font-bold tracking-tight text-balance sm:text-5xl">
           Comece hoje. Sua próxima cadeira vazia pode virar agendamento.
         </h2>
         <p className="mx-auto mt-4 max-w-md text-muted-foreground text-pretty">
@@ -677,7 +660,7 @@ function SiteFooter() {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-xs tracking-widest text-muted-foreground uppercase">
+    <span className="text-xs font-medium tracking-widest text-primary uppercase">
       {children}
     </span>
   )

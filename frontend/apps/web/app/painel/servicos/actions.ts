@@ -19,10 +19,10 @@ export async function createService(formData: FormData) {
 
   const name = String(formData.get("name") ?? "").trim()
   const description = String(formData.get("description") ?? "").trim()
-  const duration_min = Number(formData.get("duration_min") ?? 0)
+  const duration_min = Math.trunc(Number(formData.get("duration_min") ?? 0))
   const price_cents = parsePriceToCents(String(formData.get("price") ?? "0"))
 
-  if (!name || duration_min <= 0) {
+  if (!name || !Number.isFinite(duration_min) || duration_min <= 0) {
     return { error: "Informe nome e duração válida." }
   }
 
