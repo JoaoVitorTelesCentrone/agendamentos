@@ -10,6 +10,8 @@ import {
 import { createClient } from "@/lib/supabase/server"
 import { requireContext } from "@/lib/tenant"
 import { ActivitiesCard } from "@/components/ui/activities-card"
+import { BorderBeam } from "@/components/ui/magicui-border-beam"
+import { MagicCard } from "@/components/ui/magicui-magic-card"
 
 export default async function PainelPage() {
   const { tenant } = await requireContext()
@@ -70,7 +72,8 @@ export default async function PainelPage() {
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_22rem]">
-        <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
+        <MagicCard className="rounded-2xl" gradientSize={200} gradientColor="color-mix(in oklch, var(--primary) 9%, transparent)">
+        <div className="grid gap-px overflow-hidden rounded-[inherit] border border-border bg-border sm:grid-cols-2">
           {checklist.map((step, i) => (
             <Link
               key={step.label}
@@ -98,6 +101,8 @@ export default async function PainelPage() {
             </Link>
           ))}
         </div>
+        <BorderBeam size={80} duration={8} colorFrom="var(--primary)" colorTo="var(--warm)" />
+        </MagicCard>
 
         <ActivitiesCard
           headerIcon={<CalendarCheck className="size-7" />}
