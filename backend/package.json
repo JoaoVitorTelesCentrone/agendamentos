@@ -5,13 +5,15 @@
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
+    "migrate": "bun run src/db/migrate.ts",
     "test": "bun test"
   },
   "dependencies": {
-    "hono": "^4.7.0",
     "@hono/zod-validator": "^0.4.3",
-    "zod": "^3.25.0",
-    "jose": "^5.10.0"
+    "hono": "^4.7.0",
+    "jose": "^5.10.0",
+    "postgres": "^3.4.9",
+    "zod": "^3.25.0"
   },
   "devDependencies": {
     "@types/bun": "latest",

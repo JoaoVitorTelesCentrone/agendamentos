@@ -1,25 +1,26 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import { InMemoryUserRepository } from './repositories/user.repository'
-import { InMemoryProviderRepository } from './repositories/provider.repository'
-import { InMemoryServiceRepository } from './repositories/service.repository'
-import { InMemoryAvailabilityRepository } from './repositories/availability.repository'
-import { InMemoryAppointmentRepository } from './repositories/appointment.repository'
+import type { Sql } from 'postgres'
+import {
+  PostgresAppointmentRepository,
+  PostgresAvailabilityRepository,
+  PostgresProviderRepository,
+  PostgresServiceRepository,
+  PostgresUserRepository,
+} from './repositories/postgres.repositories'
 import { createAuthRoutes } from './routes/auth'
 import { createProviderRoutes } from './routes/providers'
 import { createServiceRoutes } from './routes/services'
 import { createAvailabilityRoutes } from './routes/availability'
 import { createAppointmentRoutes } from './routes/appointments'
 
-// Repositories (swap these out for real DB implementations later)
-const users = new InMemoryUserRepository()
-const providers = new InMemoryProviderRepository()
-const services = new InMemoryServiceRepository()
-const availability = new InMemoryAvailabilityRepository()
-const appointments = new InMemoryAppointmentRepository()
-
-export function createApp() {
+export function createApp(sql: Sql) {
+  const users = new PostgresUserRepository(sql)
+  const providers = new PostgresProviderRepository(sql)
+  const services = new PostgresServiceRepository(sql)
+  const availability = new PostgresAvailabilityRepository(sql)
+  const appointments = new PostgresAppointmentRepository(sql)
   const app = new Hono()
 
   app.use('*', cors())
