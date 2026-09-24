@@ -22,12 +22,14 @@ export async function createProfessional(formData: FormData) {
 }
 
 export async function toggleProfessional(id: string, active: boolean) {
+  await requireContext()
   const supabase = await createClient()
   await supabase.from("professionals").update({ active }).eq("id", id)
   revalidatePath("/painel/profissionais")
 }
 
 export async function deleteProfessional(id: string) {
+  await requireContext()
   const supabase = await createClient()
   await supabase.from("professionals").delete().eq("id", id)
   revalidatePath("/painel/profissionais")

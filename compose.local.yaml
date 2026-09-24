@@ -1,0 +1,12 @@
+services:
+  db:
+    ports:
+      - "127.0.0.1:${LOCAL_DB_PORT:-55432}:5432"
+    networks:
+      - internal
+      - edge
+
+  web:
+    environment:
+      APP_ENV: local
+      OTP_DEV_MODE: "true"

@@ -1,41 +1,23 @@
-/**
- * Aplica db/schema.sql na Neon.
- *
- * Rodar (em frontend/apps/web, com DATABASE_URL no .env.local):
- *   bun run migrate
- *
- * Destrutivo: o schema derruba e recria todas as tabelas. Use em dev/seed.
- */
-import { readFileSync } from "fs"
-import { neon } from "@neondatabase/serverless"
+/** Initialize a new, empty PostgreSQL database. Refuses existing tables. */
+import { readFileSync } from "node:fs"
+import { getSql } from "../lib/db/sql"
 
-const url = process.env.DATABASE_URL
-if (!url) {
-  console.error("Falta DATABASE_URL no .env.local")
-  process.exit(1)
-}
-
-const sql = neon(url)
+const sql = getSql()
 const schema = readFileSync(new URL("../db/schema.sql", import.meta.url), "utf8")
 
-// Sem blocos $$...$$ no schema → dá pra separar por ';'. Remove comentários de linha.
-const statements = schema
-  .split("\n")
-  .filter((line) => !line.trim().startsWith("--"))
-  .join("\n")
-  .split(";")
-  .map((s) => s.trim())
-  .filter(Boolean)
-
-async function main() {
-  console.log(`Aplicando ${statements.length} statements na Neon...`)
-  for (const stmt of statements) {
-    await sql.query(stmt)
-  }
-  console.log("✅ Schema aplicado.")
+try {
+  await sql.begin(async (tx) => {
+    const existing = await tx`
+      select count(*)::int as count
+      from pg_tables
+      where schemaname = 'public'
+    `
+    if (existing[0]?.count !== 0) {
+      throw new Error("O banco contém tabelas. Migração inicial recusada para proteger os dados.")
+    }
+    await tx.unsafe(schema)
+  })
+  console.log("Schema inicial aplicado em banco vazio.")
+} finally {
+  await sql.end()
 }
-
-main().catch((e) => {
-  console.error("Falha na migração:", e)
-  process.exit(1)
-})

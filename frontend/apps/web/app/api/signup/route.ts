@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import { hashPassword } from "@/lib/db/password"
 import { query } from "@/lib/db/sql"
+import { withinRateLimit } from "@/lib/rate-limit"
 import {
   DEFAULT_WORKING_HOURS,
   isKnownNiche,
@@ -48,6 +49,10 @@ export async function POST(request: Request) {
 
   if (!salao || nome.length < 2 || !email || password.length < 6) {
     return NextResponse.json({ error: "Dados incompletos." }, { status: 400 })
+  }
+
+  if (!(await withinRateLimit(request, "signup", 5, 60 * 60))) {
+    return NextResponse.json({ error: "Muitas tentativas. Tente mais tarde." }, { status: 429 })
   }
 
   // slug unico a partir do nome do salao

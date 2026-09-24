@@ -1,0 +1,116 @@
+name: vivio
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-vivio}
+      POSTGRES_USER: ${POSTGRES_USER:-vivio}
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
+    secrets:
+      - pg_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+
+  db_init:
+    image: postgres:17-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: ${POSTGRES_USER:-vivio}
+      PGDATABASE: ${POSTGRES_DB:-vivio}
+      PGPASSWORD_FILE: /run/secrets/pg_password
+      APP_PASSWORD_FILE: /run/secrets/app_password
+    secrets:
+      - pg_password
+      - app_password
+    volumes:
+      - ./frontend/apps/web/db/schema.sql:/schema.sql:ro
+      - ./frontend/apps/web/db/migrations/2026-07-quiz-responses.sql:/quiz.sql:ro
+      - ./frontend/apps/web/db/migrations/2026-09-request-limits.sql:/request-limits.sql:ro
+      - ./deploy/init-db.sh:/init-db.sh:ro
+      - ./deploy/grants.sql:/grants.sql:ro
+    entrypoint: ["/bin/sh", "/init-db.sh"]
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: vivio-web:local
+    restart: unless-stopped
+    depends_on:
+      db_init:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      APP_ENV: production
+      OTP_DEV_MODE: "false"
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: vivio_app
+      PGDATABASE: ${POSTGRES_DB:-vivio}
+      PGPASSWORD_FILE: /run/secrets/app_password
+      AUTH_SECRET_FILE: /run/secrets/auth_secret
+      CRON_SECRET_FILE: /run/secrets/cron_secret
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_WHATSAPP_FROM: ${TWILIO_WHATSAPP_FROM:-}
+      TWILIO_TEMPLATE_OTP_SID: ${TWILIO_TEMPLATE_OTP_SID:-}
+      TWILIO_TEMPLATE_CONFIRMATION_SID: ${TWILIO_TEMPLATE_CONFIRMATION_SID:-}
+      TWILIO_TEMPLATE_REMINDER_SID: ${TWILIO_TEMPLATE_REMINDER_SID:-}
+    secrets:
+      - app_password
+      - auth_secret
+      - cron_secret
+      - twilio_auth_token
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - internal
+      - edge
+
+secrets:
+  pg_password:
+    file: ./deploy/secrets/pg_password
+  app_password:
+    file: ./deploy/secrets/app_password
+  auth_secret:
+    file: ./deploy/secrets/auth_secret
+  cron_secret:
+    file: ./deploy/secrets/cron_secret
+  twilio_auth_token:
+    file: ./deploy/secrets/twilio_auth_token
+
+volumes:
+  postgres_data:
+
+networks:
+  internal:
+    internal: true
+  edge:

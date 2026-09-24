@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import { query } from "@/lib/db/sql"
 import { verifyPassword } from "@/lib/db/password"
+import { withinRateLimit } from "@/lib/rate-limit"
 import {
   createSessionToken,
   SESSION_COOKIE,
@@ -24,10 +25,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Informe e-mail e senha." }, { status: 400 })
   }
 
-  const rows = await query<{ id: string; email: string; password_hash: string }>(
-    "select id, email, password_hash from auth_users where email = $1",
-    [email]
-  )
+  if (!(await withinRateLimit(request, "login", 10, 15 * 60))) {
+    return NextResponse.json({ error: "Muitas tentativas. Tente mais tarde." }, { status: 429 })
+  }
+
+  let rows: { id: string; email: string; password_hash: string }[]
+  try {
+    rows = await query<{ id: string; email: string; password_hash: string }>(
+      "select id, email, password_hash from auth_users where email = $1",
+      [email]
+    )
+  } catch (error) {
+    console.error("[auth/login] banco indisponivel:", error)
+    return NextResponse.json(
+      { error: "Servico temporariamente indisponivel. Tente novamente." },
+      { status: 503 }
+    )
+  }
   const user = rows[0]
   if (!user || !(await verifyPassword(password, user.password_hash))) {
     return NextResponse.json(

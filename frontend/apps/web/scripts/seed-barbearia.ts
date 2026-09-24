@@ -7,22 +7,20 @@
  *  - cadência de retorno por cliente + barbeiro preferido
  *  - sábado lotado, terça de manhã morta, no-shows e cancelamentos
  *
- * Com a auth desligada, o painel abre o tenant do auth_user MAIS ANTIGO —
- * o dono da demo é criado com created_at antigo para o painel mostrá-la.
+ * O dono da demo entra com as credenciais exibidas ao final do script.
  *
  * Rodar (em frontend/apps/web, com DATABASE_URL no .env.local):
  *   bun run scripts/seed-barbearia.ts            # (re)cria a demo
  *   bun run scripts/seed-barbearia.ts --remove   # apaga a demo e restaura o estado anterior
  */
-import { neon } from "@neondatabase/serverless"
+import { query } from "../lib/db/sql"
 import { hashPassword } from "../lib/db/password"
 
-const url = process.env.DATABASE_URL
-if (!url) {
-  console.error("Falta DATABASE_URL no .env.local")
-  process.exit(1)
+if (process.env.APP_ENV !== "local") {
+  throw new Error("Seed de demonstração permitido somente com APP_ENV=local.")
 }
-const sql = neon(url)
+
+const sql = { query }
 
 const SLUG = "dom-costa"
 const OWNER_EMAIL = "dono@vivio.demo"
@@ -161,7 +159,7 @@ async function removeDemo() {
 async function seed() {
   await removeDemo()
 
-  // Tenant + dono (created_at antigo → painel com auth desligada abre a demo)
+  // Tenant + dono da demonstração.
   const [tenant] = (await sql.query(
     `insert into tenants (name, slug, niche, plan, status, primary_color)
      values ($1, $2, $3, $4, $5, $6) returning id`,
@@ -422,8 +420,8 @@ async function seed() {
   console.log(`   ${simClients.length} clientes · ${appts.length} agendamentos em 16 semanas`)
   console.log(`   ${concluido} concluídos · ${noShow} faltas · ${cancelado} cancelados · ${futuros} futuros`)
   console.log(``)
-  console.log(`   Painel:  http://localhost:3031/painel/insights`)
-  console.log(`   Público: http://localhost:3031/${SLUG}/public`)
+  console.log(`   Painel:  http://localhost:3000/painel/insights`)
+  console.log(`   Público: http://localhost:3000/${SLUG}/public`)
   console.log(`   Login demo: ${OWNER_EMAIL} / demo1234`)
   console.log(``)
   console.log(`   Para remover: bun run scripts/seed-barbearia.ts --remove`)

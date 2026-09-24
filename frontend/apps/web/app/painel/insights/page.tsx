@@ -412,7 +412,7 @@ export default async function InsightsPage({
                   <span className="font-medium">
                     {inactive.length} cliente{inactive.length === 1 ? "" : "s"}
                   </span>{" "}
-                  que sumiram. Um "oi" traz parte disso de volta.
+                  que sumiram. Um &quot;oi&quot; traz parte disso de volta.
                 </p>
               </div>
             )}

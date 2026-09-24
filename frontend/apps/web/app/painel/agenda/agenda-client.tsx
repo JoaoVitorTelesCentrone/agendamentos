@@ -57,11 +57,6 @@ function startOfWeek(d: Date): Date {
   x.setDate(x.getDate() - day)
   return x
 }
-function startOfMonth(d: Date): Date {
-  const x = startOfDay(d)
-  x.setDate(1)
-  return x
-}
 function addDays(d: Date, n: number): Date {
   const x = new Date(d)
   x.setDate(x.getDate() + n)
@@ -108,11 +103,13 @@ export function AgendaClient({
   services,
   professionals,
   links,
+  primaryColor,
 }: {
   appointments: AppointmentRow[]
   services: Service[]
   professionals: Professional[]
   links: ServiceProfessional[]
+  primaryColor: string
 }) {
   const [showCreate, setShowCreate] = useState(false)
   const [rescheduleTarget, setRescheduleTarget] = useState<AppointmentRow | null>(
@@ -201,6 +198,7 @@ export function AgendaClient({
           services={services}
           professionals={professionals}
           links={links}
+          primaryColor={primaryColor}
           onClose={() => setShowCreate(false)}
         />
       )}
@@ -217,6 +215,7 @@ export function AgendaClient({
           services={services}
           professionals={professionals}
           links={links}
+          primaryColor={primaryColor}
           onClose={() => setRescheduleTarget(null)}
         />
       )}

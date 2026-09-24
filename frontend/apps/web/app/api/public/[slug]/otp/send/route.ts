@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getPublicTenant, BOOKABLE_STATUS } from "@/lib/public-data"
 import { sendWhatsappOtp } from "@/lib/otp-sender"
+import { withinRateLimit } from "@/lib/rate-limit"
 import {
   OTP_TTL_MIN,
   OTP_RESEND_COOLDOWN_S,
@@ -24,6 +25,10 @@ export async function POST(
     return NextResponse.json({ error: "WhatsApp inválido." }, { status: 400 })
   }
 
+  if (!(await withinRateLimit(request, "otp-send", 12, 15 * 60))) {
+    return NextResponse.json({ error: "Muitas tentativas. Tente mais tarde." }, { status: 429 })
+  }
+
   const tenant = await getPublicTenant(slug)
   if (!tenant || !BOOKABLE_STATUS.includes(tenant.status as never)) {
     return NextResponse.json(
@@ -33,7 +38,7 @@ export async function POST(
   }
 
   const admin = createAdminClient()
-  const fixedCode = process.env.OTP_FIXED_CODE?.trim()
+  const fixedCode = isDevMode() ? process.env.OTP_FIXED_CODE?.trim() : undefined
 
   // cooldown de reenvio
   const { data: last } = await admin

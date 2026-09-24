@@ -10,7 +10,6 @@ import {
 import { createClient } from "@/lib/supabase/server"
 import { requireContext } from "@/lib/tenant"
 import { ActivitiesCard } from "@/components/ui/activities-card"
-import { BorderBeam } from "@/components/ui/magicui-border-beam"
 import { MagicCard } from "@/components/ui/magicui-magic-card"
 
 export default async function PainelPage() {
@@ -101,7 +100,6 @@ export default async function PainelPage() {
             </Link>
           ))}
         </div>
-        <BorderBeam size={80} duration={8} colorFrom="var(--primary)" colorTo="var(--warm)" />
         </MagicCard>
 
         <ActivitiesCard

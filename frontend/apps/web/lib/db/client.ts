@@ -4,7 +4,7 @@ import { getSessionUser } from "./session-server"
 import type { SessionUser } from "./session"
 
 // -----------------------------------------------------------------------------
-// Client Postgres (Neon) com a MESMA superfície do PostgREST/Supabase usada pelo
+// Client PostgreSQL com a mesma superfície do PostgREST/Supabase usada pelo
 // app: from().select()/insert()/update()/delete()/upsert(), filtros eq/neq/
 // gte/lte, order/limit, single/maybeSingle/returns, embeds (joins declarados) e
 // count/head.
@@ -413,7 +413,7 @@ export type ServerClient = DbClient & {
 }
 
 export async function makeServerClient(): Promise<ServerClient> {
-  let user = await getSessionUser()
+  const user = await getSessionUser()
   let tenantId: string | undefined
 
   if (user) {
@@ -422,20 +422,6 @@ export async function makeServerClient(): Promise<ServerClient> {
       [user.id]
     )
     tenantId = rows[0]?.tenant_id
-  } else {
-    // Auth temporariamente desabilitada: usa o primeiro perfil para abrir o painel.
-    const rows = await query<{ id: string; email: string; tenant_id: string }>(
-      `select au.id, au.email, p.tenant_id
-       from auth_users au
-       join profiles p on p.id = au.id
-       order by au.created_at asc
-       limit 1`
-    )
-    const fallback = rows[0]
-    if (fallback) {
-      user = { id: fallback.id, email: fallback.email }
-      tenantId = fallback.tenant_id
-    }
   }
 
   const scope: Scope = { scoped: true, tenantId }

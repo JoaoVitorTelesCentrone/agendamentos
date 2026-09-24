@@ -1,5 +1,7 @@
 import "server-only"
 
+import { isDevMode } from "@/lib/otp"
+
 // Transporte de mensagens WhatsApp via Twilio.
 //
 // Três modos, do menos ao mais pronto para produção:
@@ -56,8 +58,11 @@ export async function sendWhatsappMessage(
 ): Promise<SendResult> {
   const creds = credentials()
   if (!creds) {
-    console.log(`[whatsapp dev] ${whatsapp} -> ${body}`)
-    return { delivered: true, provider: "dev" }
+    if (isDevMode()) {
+      console.log(`[whatsapp dev] ${whatsapp} -> ${body}`)
+      return { delivered: true, provider: "dev" }
+    }
+    return { delivered: false, provider: "unconfigured" }
   }
   return post(
     creds,
@@ -77,8 +82,11 @@ export async function sendWhatsappTemplate(
 ): Promise<SendResult> {
   const creds = credentials()
   if (!creds) {
-    console.log(`[whatsapp dev/template ${contentSid}] ${whatsapp} -> ${fallbackBody}`)
-    return { delivered: true, provider: "dev" }
+    if (isDevMode()) {
+      console.log(`[whatsapp dev/template ${contentSid}] ${whatsapp} -> ${fallbackBody}`)
+      return { delivered: true, provider: "dev" }
+    }
+    return { delivered: false, provider: "unconfigured" }
   }
   return post(
     creds,

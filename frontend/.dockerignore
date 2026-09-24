@@ -1,0 +1,10 @@
+**/node_modules
+**/.next
+**/.turbo
+**/coverage
+**/.env
+**/.env.*
+**/*.pem
+**/*.dump
+**/.git
+**/.DS_Store

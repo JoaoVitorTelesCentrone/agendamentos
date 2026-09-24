@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { query } from "@/lib/db/sql"
+import { withinRateLimit } from "@/lib/rate-limit"
 
 // Recebe as respostas do quiz público de validação (/quiz) e grava em
 // quiz_responses. Não é tenant-scoped — é funil de descoberta, respostas globais.
@@ -33,6 +34,10 @@ export async function POST(request: Request) {
 
   if (!answers || Object.keys(answers).length === 0) {
     return NextResponse.json({ error: "Nenhuma resposta enviada." }, { status: 400 })
+  }
+
+  if (!(await withinRateLimit(request, "quiz", 30, 60 * 60))) {
+    return NextResponse.json({ error: "Muitas tentativas. Tente mais tarde." }, { status: 429 })
   }
 
   const name = (body.name ?? "").toString().trim().slice(0, 120) || null

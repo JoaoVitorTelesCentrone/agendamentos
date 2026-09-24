@@ -13,13 +13,19 @@ import {
 import type { ApptStatus, Client, Service } from "@/lib/supabase/types"
 
 export async function updateAppointmentStatus(id: string, status: ApptStatus) {
+  const { tenant } = await requireContext()
   const supabase = await createClient()
-  await supabase.from("appointments").update({ status }).eq("id", id)
+  const { error } = await supabase
+    .from("appointments")
+    .update({ status })
+    .eq("id", id)
+  if (error) return { error: "Nao foi possivel atualizar o agendamento." }
   // agendamento fora do ar não precisa mais de lembrete
   if (["cancelado", "no_show", "concluido"].includes(status)) {
-    await clearPendingNotifications(id)
+    await clearPendingNotifications(tenant.id, id)
   }
   revalidatePath("/painel/agenda")
+  return { ok: true }
 }
 
 // Cria um agendamento manualmente pelo painel (recepção/dono).
@@ -169,7 +175,7 @@ export async function rescheduleAppointment(
   ])
 
   // cancela avisos antigos e reprograma para o novo horário
-  await clearPendingNotifications(id)
+  await clearPendingNotifications(tenant.id, id)
   if (client?.clients?.whatsapp) {
     await notify({
       tenantId: tenant.id,

@@ -1,30 +1,9 @@
--- VÍVIO — schema para Postgres puro (Neon).
+-- VÍVIO — schema inicial para PostgreSQL comum.
 -- Derivado das migrations do Supabase, SEM as dependências da stack Supabase:
 --   * sem auth.users  → tabela auth_users própria (email + hash de senha)
 --   * sem RLS/policies → o isolamento por tenant é feito no app (lib/db/client.ts)
 --   * sem auth.uid()/current_tenant_id()
--- Re-executável: derruba tudo e recria (destrutivo — use só em dev/seed).
-
-drop table if exists quiz_responses       cascade;
-drop table if exists notifications        cascade;
-drop table if exists otp_verifications    cascade;
-drop table if exists leads                cascade;
-drop table if exists appointments         cascade;
-drop table if exists clients              cascade;
-drop table if exists service_professionals cascade;
-drop table if exists services             cascade;
-drop table if exists time_off             cascade;
-drop table if exists working_hours        cascade;
-drop table if exists professionals        cascade;
-drop table if exists profiles             cascade;
-drop table if exists auth_users           cascade;
-drop table if exists tenants              cascade;
-
-drop type if exists notification_status cascade;
-drop type if exists notification_type   cascade;
-drop type if exists appt_status         cascade;
-drop type if exists user_role           cascade;
-drop type if exists tenant_status       cascade;
+-- Aplique apenas em um banco vazio. Nunca apaga dados existentes.
 
 create extension if not exists "pgcrypto";   -- gen_random_uuid()
 create extension if not exists "btree_gist"; -- EXCLUDE com igualdade + range
@@ -221,3 +200,13 @@ create table quiz_responses (
   created_at timestamptz not null default now()
 );
 create index quiz_responses_created_idx on quiz_responses(quiz, created_at desc);
+
+-- Contadores atômicos para limitar tentativas em rotas públicas.
+create table request_limits (
+  key        text not null,
+  bucket     bigint not null,
+  hits       integer not null default 1,
+  created_at timestamptz not null default now(),
+  primary key (key, bucket)
+);
+create index request_limits_created_idx on request_limits(created_at);

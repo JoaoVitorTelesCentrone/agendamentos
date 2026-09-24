@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getPublicTenant } from "@/lib/public-data"
+import { withinRateLimit } from "@/lib/rate-limit"
 
 // Lead: visitante deixou contato mas não concluiu (ex.: sem horário no dia).
 export async function POST(
@@ -16,6 +17,10 @@ export async function POST(
 
   if (!whatsapp) {
     return NextResponse.json({ error: "Informe um WhatsApp." }, { status: 400 })
+  }
+
+  if (!(await withinRateLimit(request, "lead", 20, 60 * 60))) {
+    return NextResponse.json({ error: "Muitas tentativas. Tente mais tarde." }, { status: 429 })
   }
 
   const tenant = await getPublicTenant(slug)

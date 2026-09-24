@@ -118,11 +118,15 @@ export async function enqueueBookingNotifications(info: BookingInfo) {
   await admin.from("notifications").insert(rows)
 }
 
-export async function clearPendingNotifications(appointmentId: string) {
+export async function clearPendingNotifications(
+  tenantId: string,
+  appointmentId: string
+) {
   const admin = createAdminClient()
   await admin
     .from("notifications")
     .update({ status: "cancelled" })
+    .eq("tenant_id", tenantId)
     .eq("appointment_id", appointmentId)
     .eq("status", "pending")
 }

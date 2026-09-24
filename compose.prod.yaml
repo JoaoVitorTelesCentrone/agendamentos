@@ -1,0 +1,45 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - edge
+
+  cron:
+    image: alpine:3.21
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    secrets:
+      - cron_secret
+    entrypoint: ["/bin/sh", "-ec"]
+    command: |
+      while :; do
+        wget -q -O /dev/null --header="Authorization: Bearer $$(cat /run/secrets/cron_secret)" http://web:3000/api/cron/notifications || true
+        sleep 300
+      done
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - internal
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
+import { requireContext } from "@/lib/tenant"
+import { DEFAULT_BRAND } from "@/lib/themes"
 import type {
   ApptStatus,
   Professional,
@@ -21,6 +23,7 @@ export type AppointmentRow = {
 }
 
 export default async function AgendaPage() {
+  const { tenant } = await requireContext()
   const supabase = await createClient()
 
   const rangeStart = new Date()
@@ -60,11 +63,12 @@ export default async function AgendaPage() {
     ])
 
   const today = dateKey(new Date())
+  const now = new Date().getTime()
   const todayCount = (appts ?? []).filter(
     (appt) => dateKey(new Date(appt.starts_at)) === today
   ).length
   const upcoming = (appts ?? []).filter(
-    (appt) => new Date(appt.starts_at).getTime() >= Date.now()
+    (appt) => new Date(appt.starts_at).getTime() >= now
   ).length
   const revenue = (appts ?? []).reduce((sum, appt) => sum + (appt.price_cents ?? 0), 0)
 
@@ -86,6 +90,7 @@ export default async function AgendaPage() {
 
       <div className="mt-8">
         <AgendaClient
+          primaryColor={tenant.primary_color || DEFAULT_BRAND}
           appointments={appts ?? []}
           services={services ?? []}
           professionals={professionals ?? []}

@@ -1,6 +1,6 @@
 import "server-only"
 
-import { createHash } from "node:crypto"
+import { createHash, randomInt } from "node:crypto"
 
 export const OTP_TTL_MIN = 10 // validade do código
 export const OTP_MAX_ATTEMPTS = 5 // tentativas de digitação por código
@@ -12,7 +12,7 @@ export function normalizeWhatsapp(input: string): string {
 }
 
 export function generateCode(): string {
-  return String(Math.floor(100000 + Math.random() * 900000)) // 6 dígitos
+  return String(randomInt(100000, 1000000)) // 6 dígitos
 }
 
 // Hash com sal por tenant+número — não guardamos o código em claro.
@@ -24,5 +24,6 @@ export function hashCode(code: string, tenantId: string, whatsapp: string): stri
 
 // Modo dev: sem provider configurado, o código é logado e devolvido ao front.
 export function isDevMode(): boolean {
-  return process.env.OTP_DEV_MODE === "true"
+  return process.env.OTP_DEV_MODE === "true" &&
+    (process.env.NODE_ENV !== "production" || process.env.APP_ENV === "local")
 }

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getPublicTenant } from "@/lib/public-data"
+import { query } from "@/lib/db/sql"
+import { withinRateLimit } from "@/lib/rate-limit"
 import {
   OTP_MAX_ATTEMPTS,
   hashCode,
@@ -27,6 +29,10 @@ export async function POST(
 
   if (whatsapp.length < 10 || code.length !== 6) {
     return NextResponse.json({ error: "Dados inválidos." }, { status: 400 })
+  }
+
+  if (!(await withinRateLimit(request, "otp-verify", 20, 15 * 60))) {
+    return NextResponse.json({ error: "Muitas tentativas. Tente mais tarde." }, { status: 429 })
   }
 
   const tenant = await getPublicTenant(slug)
@@ -64,11 +70,21 @@ export async function POST(
     )
   }
 
-  if (otp.code_hash !== hashCode(code, tenant.id, whatsapp)) {
-    await admin
-      .from("otp_verifications")
-      .update({ attempts: otp.attempts + 1 })
-      .eq("id", otp.id)
+  // Reserve the attempt atomically so concurrent requests cannot reuse the
+  // same remaining attempt to brute-force a code.
+  const reserved = await query<{ code_hash: string }>(
+    `update otp_verifications
+     set attempts = attempts + 1
+     where id = $1 and tenant_id = $2 and whatsapp = $3
+       and attempts < $4 and expires_at > now()
+     returning code_hash`,
+    [otp.id, tenant.id, whatsapp, OTP_MAX_ATTEMPTS]
+  )
+  if (!reserved[0]) {
+    return NextResponse.json({ error: "Solicite um novo código." }, { status: 429 })
+  }
+
+  if (reserved[0].code_hash !== hashCode(code, tenant.id, whatsapp)) {
     return NextResponse.json({ error: "Código incorreto." }, { status: 400 })
   }
 

@@ -1,21 +1,19 @@
-import { neon } from "@neondatabase/serverless"
+import postgres from "postgres"
 
-// Conexão única com o Postgres da Neon (driver HTTP — funciona em Node e Edge,
-// sem WebSocket). Cada chamada é um round-trip; sem transações multi-statement,
-// que o app não usa (o signup faz rollback manual).
-let _sql: ReturnType<typeof neon> | null = null
+// One bounded connection pool per server process. Docker supplies PG* variables;
+// local development may use DATABASE_URL.
+let pool: ReturnType<typeof postgres> | null = null
 
-function getSql() {
-  if (!_sql) {
+export function getSql() {
+  if (!pool) {
     const url = process.env.DATABASE_URL
-    if (!url) {
-      throw new Error(
-        "DATABASE_URL não configurada. Preencha .env.local com a connection string da Neon."
-      )
+    if (!url && !process.env.PGHOST) {
+      throw new Error("Configure DATABASE_URL or PGHOST/PGUSER/PGPASSWORD/PGDATABASE.")
     }
-    _sql = neon(url)
+    const options = { max: 10, idle_timeout: 20, connect_timeout: 10 }
+    pool = url ? postgres(url, options) : postgres(options)
   }
-  return _sql
+  return pool
 }
 
 // Executa SQL parametrizado ($1, $2, ...) e devolve as linhas como objetos.
@@ -23,7 +21,6 @@ export async function query<T = Record<string, unknown>>(
   text: string,
   params: unknown[] = []
 ): Promise<T[]> {
-  const sql = getSql()
-  const rows = await sql.query(text, params)
-  return rows as T[]
+  const rows = await getSql().unsafe(text, params as never[])
+  return Array.from(rows) as T[]
 }

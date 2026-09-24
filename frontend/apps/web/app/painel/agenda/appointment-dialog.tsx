@@ -1,9 +1,17 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 import { X, Clock } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 import { Field } from "@/components/ui-form"
 import type {
   Professional,
@@ -29,6 +37,7 @@ type Common = {
   services: Service[]
   professionals: Professional[]
   links: ServiceProfessional[]
+  primaryColor: string
   onClose: () => void
 }
 
@@ -43,8 +52,9 @@ type Props =
     } & Common)
 
 export function AppointmentDialog(props: Props) {
-  const { services, professionals, links, onClose } = props
+  const { services, professionals, links, primaryColor, onClose } = props
   const reschedule = props.mode === "reschedule"
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
 
   const [serviceId, setServiceId] = useState(
     reschedule ? props.serviceId : (services[0]?.id ?? "")
@@ -59,6 +69,15 @@ export function AppointmentDialog(props: Props) {
   const [autoAdvanced, setAutoAdvanced] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    setPortalTarget(document.body)
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [])
 
   // profissionais que fazem o serviço; se nenhum vínculo, cai p/ todos ativos
   const eligible = (() => {
@@ -147,142 +166,162 @@ export function AppointmentDialog(props: Props) {
     }
   }
 
-  return (
+  if (!portalTarget) return null
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 sm:p-6"
       onClick={onClose}
+      style={{ "--primary": primaryColor } as React.CSSProperties}
     >
       <div
-        className="max-h-[90svh] w-full max-w-md overflow-y-auto border border-border bg-background p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="appointment-dialog-title"
+        className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col overflow-hidden rounded-xl border border-border bg-card shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg">
-            {reschedule ? "Remarcar agendamento" : "Novo agendamento"}
-          </h2>
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-5 py-4">
+          <div>
+            <h2 id="appointment-dialog-title" className="font-heading text-lg">
+              {reschedule ? "Remarcar agendamento" : "Novo agendamento"}
+            </h2>
+            {reschedule && (
+              <p className="mt-1 text-sm text-muted-foreground">{props.clientLabel}</p>
+            )}
+          </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground"
+            className="shrink-0 text-muted-foreground hover:text-foreground"
             aria-label="Fechar"
           >
             <X className="size-5" />
           </button>
         </div>
 
-        {reschedule && (
-          <p className="mb-4 text-sm text-muted-foreground">{props.clientLabel}</p>
-        )}
-
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          {error && (
-            <p className="border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-              {error}
-            </p>
-          )}
-
-          {!reschedule && (
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium tracking-wide">Serviço</span>
-              <select
-                value={serviceId}
-                onChange={(e) => setServiceId(e.target.value)}
-                className="h-10 border border-input bg-background px-3 text-sm"
-              >
-                {services.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} · {s.duration_min} min
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium tracking-wide">Profissional</span>
-            <select
-              value={professionalId}
-              onChange={(e) => setProfessionalId(e.target.value)}
-              className="h-10 border border-input bg-background px-3 text-sm"
-            >
-              <option value="">Selecione...</option>
-              {eligible.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium tracking-wide">Data</span>
-            <input
-              type="date"
-              value={date}
-              min={todayIso()}
-              onChange={(e) => setDate(e.target.value)}
-              className="h-10 border border-input bg-background px-3 text-sm"
-            />
-          </label>
-
-          {/* horários */}
-          <div>
-            <span className="text-xs font-medium tracking-wide">Horário</span>
-            {!professionalId ? (
-              <p className="mt-2 text-sm text-muted-foreground">
-                Escolha um profissional.
+        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-5 py-5">
+            {error && (
+              <p className="border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                {error}
               </p>
-            ) : loadingSlots ? (
-              <p className="mt-2 text-sm text-muted-foreground">Carregando...</p>
-            ) : slots && slots.length === 0 ? (
-              <p className="mt-2 text-sm text-muted-foreground">
-                Sem horários livres nesse dia. Tente outra data — pode ser que o
-                profissional não atenda nesse dia ou os horários já tenham
-                passado.
-              </p>
-            ) : (
-              <div className="mt-2 grid grid-cols-4 gap-2">
-                {slots?.map((s) => (
-                  <button
-                    key={s.startsAt}
-                    type="button"
-                    onClick={() => setSlot(s)}
-                    className={`flex items-center justify-center gap-1 border py-2 text-sm transition-colors ${
-                      slot?.startsAt === s.startsAt
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-card hover:border-primary"
-                    }`}
-                  >
-                    <Clock className="size-3" />
-                    {s.label}
-                  </button>
-                ))}
-              </div>
             )}
-          </div>
 
-          {!reschedule && (
-            <>
-              <Field label="Nome do cliente" name="name" placeholder="Maria" required />
-              <Field
-                label="WhatsApp"
-                name="whatsapp"
-                type="tel"
-                inputMode="tel"
-                placeholder="(11) 99999-9999"
-                required
+            {!reschedule && (
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium tracking-wide">Serviço</span>
+                <Select
+                  value={serviceId}
+                  onValueChange={setServiceId}
+                >
+                  <SelectTrigger aria-label="Serviço">
+                    <SelectValue placeholder="Selecione um serviço" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {services.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name} · {s.duration_min} min
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+            )}
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium tracking-wide">Profissional</span>
+              <Select
+                value={professionalId}
+                onValueChange={setProfessionalId}
+              >
+                <SelectTrigger aria-label="Profissional">
+                  <SelectValue placeholder="Selecione um profissional" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eligible.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </label>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium tracking-wide">Data</span>
+              <input
+                type="date"
+                value={date}
+                min={todayIso()}
+                onChange={(e) => setDate(e.target.value)}
+                className="h-10 border border-input bg-background px-3 text-sm"
               />
-            </>
-          )}
+            </label>
 
-          <Button type="submit" size="lg" disabled={busy || !slot}>
-            {busy
-              ? "Salvando..."
-              : reschedule
-                ? "Confirmar remarcação"
-                : "Criar agendamento"}
-          </Button>
+            {/* horários */}
+            <div>
+              <span className="text-xs font-medium tracking-wide">Horário</span>
+              {!professionalId ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Escolha um profissional.
+                </p>
+              ) : loadingSlots ? (
+                <p className="mt-2 text-sm text-muted-foreground">Carregando...</p>
+              ) : slots && slots.length === 0 ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Sem horários livres nesse dia. Tente outra data — pode ser que o
+                  profissional não atenda nesse dia ou os horários já tenham
+                  passado.
+                </p>
+              ) : (
+                <div className="mt-2 grid grid-cols-4 gap-2">
+                  {slots?.map((s) => (
+                    <button
+                      key={s.startsAt}
+                      type="button"
+                      onClick={() => setSlot(s)}
+                      className={`flex items-center justify-center gap-1 border py-2 text-sm transition-colors ${
+                        slot?.startsAt === s.startsAt
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card hover:border-primary"
+                      }`}
+                    >
+                      <Clock className="size-3" />
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {!reschedule && (
+              <>
+                <Field label="Nome do cliente" name="name" placeholder="Maria" required />
+                <Field
+                  label="WhatsApp"
+                  name="whatsapp"
+                  type="tel"
+                  inputMode="tel"
+                  placeholder="(11) 99999-9999"
+                  required
+                />
+              </>
+            )}
+
+          </div>
+          <div className="shrink-0 border-t border-border bg-card px-5 py-4">
+            <Button type="submit" size="lg" disabled={busy || !slot} className="w-full">
+              {busy
+                ? "Salvando..."
+                : reschedule
+                  ? "Confirmar remarcação"
+                  : "Criar agendamento"}
+            </Button>
+          </div>
         </form>
       </div>
-    </div>
+    </div>,
+    portalTarget
   )
 }

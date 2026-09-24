@@ -30,6 +30,9 @@ coverage/
 # misc
 .DS_Store
 *.pem
+deploy/secrets/
+backups/
+*.dump
 
 # debug
 npm-debug.log*

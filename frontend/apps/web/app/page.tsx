@@ -15,7 +15,6 @@ import {
 import { Button } from "@workspace/ui/components/button"
 import { HoverLift, Reveal } from "@/components/ui/motion-primitives"
 import { ThemeToggle } from "@/components/theme-provider"
-import { BorderBeam } from "@/components/ui/magicui-border-beam"
 import { MagicCard } from "@/components/ui/magicui-magic-card"
 import { ShimmerCta } from "@/components/ui/magicui-shimmer-cta"
 
@@ -189,7 +188,6 @@ function HeroMock() {
           ))}
         </ul>
         </div>
-        <BorderBeam size={90} duration={7} colorFrom="var(--primary)" colorTo="var(--warm)" />
       </MagicCard>
 
       <div className="flex items-center gap-3 rounded-2xl border border-warm/30 bg-accent/35 p-4 shadow-lg shadow-warm/10">

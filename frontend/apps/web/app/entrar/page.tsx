@@ -24,8 +24,13 @@ export default function EntrarPage() {
     setLoading(true)
     try {
       await login({ email, password })
+      const requestedPath = new URLSearchParams(window.location.search).get("next")
+      const destination =
+        requestedPath?.startsWith("/painel") && !requestedPath.startsWith("//")
+          ? requestedPath
+          : "/painel"
       router.refresh()
-      router.push("/painel")
+      router.push(destination)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao entrar.")
       setLoading(false)

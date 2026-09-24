@@ -1,17 +1,22 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import Link from "next/link"
 import { Trash2, Plus } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 import { Field, TextArea, formatPrice } from "@/components/ui-form"
-import type { Service } from "@/lib/supabase/types"
+import type { Professional, Service, ServiceProfessional } from "@/lib/supabase/types"
 import { createService, deleteService, toggleService } from "./actions"
 
 export function ServicosClient({
   initialServices,
+  professionals,
+  links,
 }: {
   initialServices: Service[]
+  professionals: Professional[]
+  links: ServiceProfessional[]
 }) {
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
@@ -64,7 +69,30 @@ export function ServicosClient({
           name="description"
           placeholder="Detalhes que o cliente vê na página."
         />
-        <Button type="submit" disabled={pending}>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 text-sm font-medium">Profissionais responsáveis</legend>
+          {professionals.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Para criar um serviço, primeiro cadastre um profissional em{" "}
+              <Link href="/painel/profissionais" className="underline underline-offset-2">
+                Profissionais
+              </Link>.
+            </p>
+          ) : (
+            professionals.map((professional) => (
+              <label key={professional.id} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="professional_ids"
+                  value={professional.id}
+                  className="size-4"
+                />
+                {professional.name}
+              </label>
+            ))
+          )}
+        </fieldset>
+        <Button type="submit" disabled={pending || professionals.length === 0}>
           <Plus className="size-4" data-icon="inline-start" />
           {pending ? "Salvando..." : "Adicionar serviço"}
         </Button>
@@ -91,6 +119,14 @@ export function ServicosClient({
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {s.duration_min} min · {formatPrice(s.price_cents)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Profissionais: {professionals
+                      .filter((professional) => links.some(
+                        (link) => link.service_id === s.id && link.professional_id === professional.id
+                      ))
+                      .map((professional) => professional.name)
+                      .join(", ") || "Nenhum ativo"}
                   </p>
                 </div>
                 <ActionButtons id={s.id} active={s.active} />

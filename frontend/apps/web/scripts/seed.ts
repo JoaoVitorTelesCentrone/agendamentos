@@ -1,5 +1,5 @@
 /**
- * Seed de dados de teste da VÍVIO (Neon).
+ * Seed de dados de teste da VÍVIO (somente ambiente local).
  *
  * Cria um salão completo (Studio Bella) com profissionais, serviços, horários,
  * clientes e agendamentos — incluindo histórico para o CRM e os insights.
@@ -15,6 +15,10 @@
  */
 import { query } from "../lib/db/sql"
 import { hashPassword } from "../lib/db/password"
+
+if (process.env.APP_ENV !== "local") {
+  throw new Error("Seed de demonstração permitido somente com APP_ENV=local.")
+}
 
 const SLUG = "studio-bella"
 const EMAIL = "dono@vivio.app"
