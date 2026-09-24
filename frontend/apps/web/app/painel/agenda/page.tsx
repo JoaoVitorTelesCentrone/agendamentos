@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { query } from "@/lib/db/sql"
 import { requireContext } from "@/lib/tenant"
 import { DEFAULT_BRAND } from "@/lib/themes"
 import type {
@@ -8,6 +9,7 @@ import type {
   ServiceProfessional,
 } from "@/lib/supabase/types"
 import { AgendaClient } from "./agenda-client"
+import { AvailabilityExceptions } from "./availability-exceptions"
 
 export type AppointmentRow = {
   id: string
@@ -22,8 +24,9 @@ export type AppointmentRow = {
   services: { name: string } | null
 }
 
-export default async function AgendaPage() {
+export default async function AgendaPage({ searchParams }: { searchParams: Promise<{ disponibilidade?: string }> }) {
   const { tenant } = await requireContext()
+  const params = await searchParams
   const supabase = await createClient()
 
   const rangeStart = new Date()
@@ -62,6 +65,17 @@ export default async function AgendaPage() {
         .returns<ServiceProfessional[]>(),
     ])
 
+  const exceptions = await query<{
+    id: string; professional_name: string | null; starts_at: string; ends_at: string; reason: string | null
+  }>(
+    `select e.id, p.name as professional_name, e.starts_at, e.ends_at, e.reason
+     from availability_exceptions e
+     left join professionals p on p.id = e.professional_id and p.tenant_id = e.tenant_id
+     where e.tenant_id = $1 and e.type = 'block' and e.ends_at > now()
+     order by e.starts_at asc limit 100`,
+    [tenant.id]
+  )
+
   const today = dateKey(new Date())
   const now = new Date().getTime()
   const todayCount = (appts ?? []).filter(
@@ -97,6 +111,12 @@ export default async function AgendaPage() {
           links={links ?? []}
         />
       </div>
+      <AvailabilityExceptions
+        exceptions={exceptions}
+        professionals={(professionals ?? []).map(({ id, name }) => ({ id, name }))}
+        timeZone={tenant.timezone || "America/Sao_Paulo"}
+        error={params.disponibilidade === "erro" ? "erro" : undefined}
+      />
     </div>
   )
 }

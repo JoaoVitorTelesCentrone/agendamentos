@@ -49,7 +49,7 @@ export async function getAvailableSlots(params: {
     .lte("starts_at", dayEnd)
   if (excludeAppointmentId) apptQuery = apptQuery.neq("id", excludeAppointmentId)
 
-  const [{ data: appts }, { data: offs }] = await Promise.all([
+  const [{ data: appts }, { data: offs }, { data: exceptions }] = await Promise.all([
     apptQuery.returns<(Interval & { id: string })[]>(),
     supabase
       .from("time_off")
@@ -58,6 +58,13 @@ export async function getAvailableSlots(params: {
       .lte("starts_at", dayEnd)
       .gte("ends_at", dayStart)
       .returns<Interval[]>(),
+    supabase
+      .from("availability_exceptions")
+      .select("professional_id, starts_at, ends_at, type")
+      .eq("type", "block")
+      .lte("starts_at", dayEnd)
+      .gte("ends_at", dayStart)
+      .returns<(Interval & { professional_id: string | null; type: string })[]>(),
   ])
 
   const slots = computeSlots({
@@ -66,7 +73,13 @@ export async function getAvailableSlots(params: {
       start_time: h.start_time,
       end_time: h.end_time,
     })),
-    busy: [...(appts ?? []), ...(offs ?? [])],
+    busy: [
+      ...(appts ?? []),
+      ...(offs ?? []),
+      ...(exceptions ?? [])
+        .filter((exception) => !exception.professional_id || exception.professional_id === professionalId)
+        .map(({ starts_at, ends_at }) => ({ starts_at, ends_at })),
+    ],
     durationMin: service.duration_min,
   })
 

@@ -6,7 +6,7 @@ import { SignJWT, jwtVerify } from "jose"
 export const SESSION_COOKIE = "vivio_session"
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30 // 30 dias
 
-export type SessionUser = { id: string; email: string }
+export type SessionUser = { id: string; email: string; sessionVersion?: number }
 
 function secret(): Uint8Array {
   const s = process.env.AUTH_SECRET
@@ -19,7 +19,7 @@ function secret(): Uint8Array {
 }
 
 export async function createSessionToken(user: SessionUser): Promise<string> {
-  return new SignJWT({ email: user.email })
+  return new SignJWT({ email: user.email, sv: user.sessionVersion ?? 0 })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
     .setIssuedAt()
@@ -33,7 +33,11 @@ export async function verifySessionToken(
   try {
     const { payload } = await jwtVerify(token, secret())
     if (!payload.sub || typeof payload.email !== "string") return null
-    return { id: payload.sub, email: payload.email }
+    return {
+      id: payload.sub,
+      email: payload.email,
+      sessionVersion: typeof payload.sv === "number" ? payload.sv : 0,
+    }
   } catch {
     return null
   }

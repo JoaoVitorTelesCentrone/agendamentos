@@ -19,6 +19,7 @@ describe("sessao do painel", () => {
     await expect(verifySessionToken(token)).resolves.toEqual({
       id: "user-1",
       email: "dono@example.com",
+      sessionVersion: 0,
     })
   })
 

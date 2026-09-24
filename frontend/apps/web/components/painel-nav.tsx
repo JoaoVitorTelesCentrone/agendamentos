@@ -9,6 +9,9 @@ import {
   Users,
   Contact,
   Lightbulb,
+  Wallet,
+  MessageCircle,
+  CreditCard,
   Settings,
   ExternalLink,
 } from "lucide-react"
@@ -20,6 +23,9 @@ const items = [
   { href: "/painel/profissionais", label: "Profissionais", icon: Users },
   { href: "/painel/clientes", label: "Clientes", icon: Contact },
   { href: "/painel/insights", label: "Insights", icon: Lightbulb },
+  { href: "/painel/financeiro", label: "Financeiro", icon: Wallet },
+  { href: "/painel/marketing", label: "Marketing", icon: MessageCircle },
+  { href: "/painel/assinatura", label: "Plano", icon: CreditCard },
   { href: "/painel/configuracoes", label: "Ajustes", icon: Settings },
 ]
 

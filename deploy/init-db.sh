@@ -22,6 +22,7 @@ else
 fi
 
 psql -X -v ON_ERROR_STOP=1 -1 -f /request-limits.sql
+psql -X -v ON_ERROR_STOP=1 -1 -f /product-integration.sql
 
 psql -X -v ON_ERROR_STOP=1 -f /grants.sql
 app_password="$(cat "$APP_PASSWORD_FILE")"

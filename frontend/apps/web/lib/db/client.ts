@@ -30,6 +30,11 @@ const TENANT_TABLES = new Set([
   "leads",
   "notifications",
   "otp_verifications",
+  "appointment_events",
+  "availability_exceptions",
+  "transactions",
+  "finance_insights",
+  "subscriptions",
   "profiles",
 ])
 
@@ -413,15 +418,20 @@ export type ServerClient = DbClient & {
 }
 
 export async function makeServerClient(): Promise<ServerClient> {
-  const user = await getSessionUser()
+  let user = await getSessionUser()
   let tenantId: string | undefined
 
   if (user) {
-    const rows = await query<{ tenant_id: string }>(
-      "select tenant_id from profiles where id = $1",
+    const rows = await query<{ tenant_id: string; session_version: number }>(
+      `select p.tenant_id, u.session_version
+       from profiles p join auth_users u on u.id = p.id where p.id = $1`,
       [user.id]
     )
-    tenantId = rows[0]?.tenant_id
+    if (!rows[0] || Number(rows[0].session_version) !== (user.sessionVersion ?? 0)) {
+      user = null
+    } else {
+      tenantId = rows[0].tenant_id
+    }
   }
 
   const scope: Scope = { scoped: true, tenantId }

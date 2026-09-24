@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache"
 
-import { getSql } from "@/lib/db/sql"
+import { getSql, query } from "@/lib/db/sql"
 import { createClient } from "@/lib/supabase/server"
 import { requireContext } from "@/lib/tenant"
+import { freePlanServiceLimit } from "@/lib/stripe"
 
 // Converte "45,90" ou "45.90" em centavos.
 function parsePriceToCents(input: string): number {
@@ -16,6 +17,13 @@ function parsePriceToCents(input: string): number {
 
 export async function createService(formData: FormData) {
   const { tenant } = await requireContext()
+
+  if (tenant.plan.toLowerCase() !== "pro") {
+    const rows = await query<{ count: number }>("select count(*)::int as count from services where tenant_id = $1 and active = true", [tenant.id])
+    if (Number(rows[0]?.count ?? 0) >= freePlanServiceLimit) {
+      return { error: `O plano Free permite até ${freePlanServiceLimit} serviços ativos. Desative um serviço ou faça upgrade para o Pro.` }
+    }
+  }
 
   const name = String(formData.get("name") ?? "").trim()
   const description = String(formData.get("description") ?? "").trim()

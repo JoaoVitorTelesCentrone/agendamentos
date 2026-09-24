@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 
+import { query } from "@/lib/db/sql"
 import { createClient } from "@/lib/supabase/server"
 import { requireContext } from "@/lib/tenant"
 
@@ -36,5 +37,19 @@ export async function updateAppearance(formData: FormData) {
 
   revalidatePath("/painel", "layout")
   revalidatePath(`/${tenant.slug}/public`)
+  return { ok: true }
+}
+
+export async function updateFinanceRates(formData: FormData) {
+  const { tenant, profile } = await requireContext()
+  if (profile.role !== "admin") return { error: "Somente a pessoa administradora pode alterar estes valores." }
+  const taxRate = Number(String(formData.get("tax_rate") ?? ""))
+  const cardFeeRate = Number(String(formData.get("card_fee_rate") ?? ""))
+  if (!Number.isFinite(taxRate) || taxRate < 0 || taxRate > 100 || !Number.isFinite(cardFeeRate) || cardFeeRate < 0 || cardFeeRate > 100) {
+    return { error: "Informe percentuais entre 0 e 100." }
+  }
+  await query("update tenants set tax_rate = $2, card_fee_rate = $3 where id = $1", [tenant.id, taxRate, cardFeeRate])
+  revalidatePath("/painel/financeiro")
+  revalidatePath("/painel/configuracoes")
   return { ok: true }
 }

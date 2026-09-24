@@ -68,6 +68,7 @@ export default function EntrarPage() {
           autoComplete="current-password"
           required
         />
+        <Link href="/recuperar-senha" className="-mt-2 self-end text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">Esqueci minha senha</Link>
         <Button type="submit" size="lg" className="mt-2 w-full" disabled={loading}>
           {loading ? "Entrando..." : "Entrar"}
           {!loading && <ArrowRight className="size-4" data-icon="inline-end" />}

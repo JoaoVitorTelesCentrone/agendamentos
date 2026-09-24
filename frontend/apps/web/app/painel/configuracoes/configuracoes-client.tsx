@@ -5,7 +5,7 @@ import { Check, ImagePlus, Trash2 } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 import { DEFAULT_BRAND, THEME_PRESETS } from "@/lib/themes"
-import { updateAppearance } from "./actions"
+import { updateAppearance, updateFinanceRates } from "./actions"
 
 const MAX_FILE_BYTES = 8 * 1024 * 1024
 
@@ -48,16 +48,25 @@ export function ConfiguracoesClient({
   tenantName,
   initialColor,
   initialLogoUrl,
+  initialTaxRate,
+  initialCardFeeRate,
 }: {
   tenantName: string
   initialColor: string | null
   initialLogoUrl: string | null
+  initialTaxRate: number
+  initialCardFeeRate: number
 }) {
   const [color, setColor] = useState(initialColor || DEFAULT_BRAND)
   // undefined = mantém o logo atual; null = remover; string = novo data URL
   const [newLogo, setNewLogo] = useState<string | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const [taxRate, setTaxRate] = useState(initialTaxRate)
+  const [cardFeeRate, setCardFeeRate] = useState(initialCardFeeRate)
+  const [financeSaved, setFinanceSaved] = useState(false)
+  const [financeError, setFinanceError] = useState<string | null>(null)
+  const [financePending, startFinanceTransition] = useTransition()
   const [pending, startTransition] = useTransition()
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -104,9 +113,33 @@ export function ConfiguracoesClient({
     })
   }
 
+  async function onSaveFinance(formData: FormData) {
+    setFinanceError(null)
+    setFinanceSaved(false)
+    await new Promise<void>((resolve) => {
+      startFinanceTransition(async () => {
+        const result = await updateFinanceRates(formData)
+        if (result?.error) setFinanceError(result.error)
+        else setFinanceSaved(true)
+        resolve()
+      })
+    })
+  }
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
       <div className="flex flex-col gap-8">
+        <form action={onSaveFinance} className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm shadow-foreground/5">
+          <h2 className="font-medium">Impostos e taxas</h2>
+          <p className="mt-1 text-sm text-muted-foreground">O resumo financeiro estima esses valores sobre o faturamento do mês.</p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">Imposto sobre faturamento (%)<input name="tax_rate" type="number" min="0" max="100" step="0.01" required value={taxRate} onChange={(event) => { setTaxRate(Number(event.target.value)); setFinanceSaved(false) }} className="h-11 rounded-xl border border-input bg-background px-3 text-sm text-foreground" /></label>
+            <label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">Taxa média de cartão (%)<input name="card_fee_rate" type="number" min="0" max="100" step="0.01" required value={cardFeeRate} onChange={(event) => { setCardFeeRate(Number(event.target.value)); setFinanceSaved(false) }} className="h-11 rounded-xl border border-input bg-background px-3 text-sm text-foreground" /></label>
+          </div>
+          {financeError && <p role="alert" className="mt-3 text-sm text-destructive">{financeError}</p>}
+          <div className="mt-4 flex items-center gap-3"><Button disabled={financePending}>{financePending ? "Salvando…" : "Salvar valores"}</Button>{financeSaved && <span role="status" className="text-sm text-muted-foreground">Valores salvos.</span>}</div>
+        </form>
+
         {/* Logo */}
         <section className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm shadow-foreground/5">
           <h2 className="font-medium">Logo do estabelecimento</h2>

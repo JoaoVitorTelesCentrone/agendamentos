@@ -25,6 +25,16 @@ export type Tenant = {
   primary_color: string | null
   logo_url: string | null
   cancel_min_minutes: number
+  description: string | null
+  phone: string | null
+  address: string | null
+  timezone: string
+  tax_rate: number
+  card_fee_rate: number
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  stripe_price_id: string | null
+  stripe_current_period_end: string | null
   created_at: string
 }
 
@@ -85,7 +95,9 @@ export type Client = {
   whatsapp: string
   name: string
   notes: string | null
+  email: string | null
   created_at: string
+  updated_at: string
 }
 
 export type Appointment = {
@@ -99,7 +111,9 @@ export type Appointment = {
   status: ApptStatus
   price_cents: number
   notes: string | null
+  source: string
   created_at: string
+  updated_at: string
 }
 
 export type Lead = {

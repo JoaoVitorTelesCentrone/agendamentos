@@ -29,10 +29,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Muitas tentativas. Tente mais tarde." }, { status: 429 })
   }
 
-  let rows: { id: string; email: string; password_hash: string }[]
+  let rows: { id: string; email: string; password_hash: string; session_version: number }[]
   try {
-    rows = await query<{ id: string; email: string; password_hash: string }>(
-      "select id, email, password_hash from auth_users where email = $1",
+    rows = await query<{ id: string; email: string; password_hash: string; session_version: number }>(
+      "select id, email, password_hash, session_version from auth_users where email = $1",
       [email]
     )
   } catch (error) {
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const token = await createSessionToken({ id: user.id, email: user.email })
+  const token = await createSessionToken({ id: user.id, email: user.email, sessionVersion: Number(user.session_version) })
   const res = NextResponse.json({ ok: true })
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,

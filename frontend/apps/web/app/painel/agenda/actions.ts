@@ -1,6 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
+import { query } from "@/lib/db/sql"
 
 import { createClient } from "@/lib/supabase/server"
 import { requireContext } from "@/lib/tenant"
@@ -15,11 +17,15 @@ import type { ApptStatus, Client, Service } from "@/lib/supabase/types"
 export async function updateAppointmentStatus(id: string, status: ApptStatus) {
   const { tenant } = await requireContext()
   const supabase = await createClient()
+  const { data: previous } = await supabase.from("appointments").select("status").eq("id", id).maybeSingle<{ status: ApptStatus }>()
   const { error } = await supabase
     .from("appointments")
-    .update({ status })
+    .update({ status, updated_at: new Date().toISOString() })
     .eq("id", id)
   if (error) return { error: "Nao foi possivel atualizar o agendamento." }
+  if (previous && previous.status !== status) {
+    await logAppointmentEvent(tenant.id, id, status === "cancelado" ? "cancelled" : "status_changed", previous.status, status)
+  }
   // agendamento fora do ar não precisa mais de lembrete
   if (["cancelado", "no_show", "concluido"].includes(status)) {
     await clearPendingNotifications(tenant.id, id)
@@ -89,6 +95,7 @@ export async function createAppointment(input: {
       starts_at: start.toISOString(),
       ends_at: end.toISOString(),
       status: "confirmado", // criado pelo salão já entra confirmado
+      source: "manual",
       price_cents: service.price_cents,
     })
     .select("id")
@@ -99,6 +106,8 @@ export async function createAppointment(input: {
     }
     return { error: "Não foi possível criar o agendamento." }
   }
+
+  await logAppointmentEvent(tenant.id, appt.id, "created", null, "confirmado", { source: "manual" })
 
   await notify({
     tenantId: tenant.id,
@@ -127,9 +136,9 @@ export async function rescheduleAppointment(
 
   const { data: appt } = await supabase
     .from("appointments")
-    .select("id, service_id, professional_id")
+    .select("id, service_id, professional_id, starts_at, status")
     .eq("id", id)
-    .maybeSingle<{ id: string; service_id: string; professional_id: string }>()
+    .maybeSingle<{ id: string; service_id: string; professional_id: string; starts_at: string; status: ApptStatus }>()
   if (!appt) return { error: "Agendamento não encontrado." }
 
   const { data: service } = await supabase
@@ -151,6 +160,7 @@ export async function rescheduleAppointment(
       ends_at: end.toISOString(),
       professional_id: professionalId,
       status: "agendado",
+      updated_at: new Date().toISOString(),
     })
     .eq("id", id)
   if (error) {
@@ -159,6 +169,12 @@ export async function rescheduleAppointment(
     }
     return { error: "Não foi possível remarcar." }
   }
+
+  await logAppointmentEvent(tenant.id, id, "rescheduled", appt.status, "agendado", {
+    previous_starts_at: appt.starts_at,
+    starts_at: start.toISOString(),
+    professional_id: professionalId,
+  })
 
   // dados p/ a nova mensagem
   const [{ data: client }, { data: professional }] = await Promise.all([
@@ -193,6 +209,65 @@ export async function rescheduleAppointment(
 
   revalidatePath("/painel/agenda")
   return { ok: true }
+}
+
+export async function createAvailabilityException(formData: FormData) {
+  const { tenant } = await requireContext()
+  const professionalId = String(formData.get("professional_id") ?? "").trim()
+  const startsAtInput = String(formData.get("starts_at") ?? "")
+  const endsAtInput = String(formData.get("ends_at") ?? "")
+  const reason = String(formData.get("reason") ?? "").trim().slice(0, 160)
+  const isDateTime = (value: string) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)
+  if (!isDateTime(startsAtInput) || !isDateTime(endsAtInput)) redirect("/painel/agenda?disponibilidade=erro")
+  const startsAt = new Date(`${startsAtInput}:00-03:00`)
+  const endsAt = new Date(`${endsAtInput}:00-03:00`)
+  if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
+    redirect("/painel/agenda?disponibilidade=erro")
+  }
+  if (professionalId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(professionalId)) {
+    redirect("/painel/agenda?disponibilidade=erro")
+  }
+  if (professionalId) {
+    const exists = await query<{ id: string }>(
+      "select id from professionals where id = $1 and tenant_id = $2 and active = true limit 1",
+      [professionalId, tenant.id]
+    )
+    if (!exists[0]) redirect("/painel/agenda?disponibilidade=erro")
+  }
+  await query(
+    `insert into availability_exceptions (tenant_id, professional_id, starts_at, ends_at, type, reason)
+     values ($1, $2, $3, $4, 'block', $5)`,
+    [tenant.id, professionalId || null, startsAt.toISOString(), endsAt.toISOString(), reason || null]
+  )
+  revalidatePath("/painel/agenda")
+  redirect("/painel/agenda")
+}
+
+export async function deleteAvailabilityException(formData: FormData) {
+  const { tenant } = await requireContext()
+  const id = String(formData.get("id") ?? "")
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return
+  await query("delete from availability_exceptions where id = $1 and tenant_id = $2", [id, tenant.id])
+  revalidatePath("/painel/agenda")
+}
+
+async function logAppointmentEvent(
+  tenantId: string,
+  appointmentId: string,
+  type: "created" | "status_changed" | "rescheduled" | "cancelled",
+  fromStatus: ApptStatus | null,
+  toStatus: ApptStatus,
+  metadata?: Record<string, string>
+) {
+  try {
+    await query(
+      `insert into appointment_events (tenant_id, appointment_id, type, from_status, to_status, metadata)
+       values ($1, $2, $3, $4, $5, $6::jsonb)`,
+      [tenantId, appointmentId, type, fromStatus, toStatus, metadata ? JSON.stringify(metadata) : null]
+    )
+  } catch (error) {
+    console.error("[agenda] falha ao registrar evento do agendamento", error)
+  }
 }
 
 // Enfileira as notificações e dispara a confirmação na hora, sem quebrar a ação.

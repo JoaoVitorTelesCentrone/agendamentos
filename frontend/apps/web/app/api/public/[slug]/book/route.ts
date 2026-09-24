@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 
+import { query } from "@/lib/db/sql"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getPublicTenant, BOOKABLE_STATUS } from "@/lib/public-data"
 import { OTP_BOOKING_WINDOW_MIN, normalizeWhatsapp } from "@/lib/otp"
@@ -134,6 +135,7 @@ export async function POST(
       starts_at: start.toISOString(),
       ends_at: end.toISOString(),
       status: "agendado",
+      source: "public_booking",
       price_cents: service.price_cents,
     })
     .select("id")
@@ -152,6 +154,12 @@ export async function POST(
       { status: 400 }
     )
   }
+
+  await query(
+    `insert into appointment_events (tenant_id, appointment_id, type, to_status, metadata)
+     values ($1, $2, 'created', 'agendado', $3::jsonb)`,
+    [tenant.id, appt.id, JSON.stringify({ source: "public_booking" })]
+  ).catch((error) => console.error("[book] falha ao registrar histórico", error))
 
   // consome as verificações desse número (uso único por agendamento)
   await admin

@@ -15,6 +15,8 @@ export default async function ConfiguracoesPage() {
           tenantName={tenant.name}
           initialColor={tenant.primary_color}
           initialLogoUrl={tenant.logo_url}
+          initialTaxRate={Number(tenant.tax_rate ?? 0)}
+          initialCardFeeRate={Number(tenant.card_fee_rate ?? 0)}
         />
       </div>
     </div>

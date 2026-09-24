@@ -12,6 +12,7 @@
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "migrate": "bun run scripts/migrate.ts",
+    "migrate:upgrades": "bun run scripts/apply-migrations.ts",
     "seed": "bun run scripts/seed.ts"
   },
   "dependencies": {
@@ -27,7 +28,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-icons": "^5.7.0",
-    "react-use-measure": "^2.1.7"
+    "react-use-measure": "^2.1.7",
+    "stripe": "22.3.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
