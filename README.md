@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AgendaFlow
 
-## Getting Started
+Agenda online para profissionais que atendem com hora marcada. O projeto usa Next.js 16, Prisma/PostgreSQL, Auth.js, Resend e Stripe.
 
-First, run the development server:
+## Desenvolvimento local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+npm run dev:all
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`dev:all` inicia o Prisma Postgres local, sincroniza o esquema para desenvolvimento e sobe o Next.js. A porta padrão é 3000. Para outra porta, use `PORT=3002 npm run dev:all` (PowerShell: `$env:PORT='3002'; npm run dev:all`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Com um PostgreSQL já configurado em `DATABASE_URL`, use `npm run dev`. Configure `AUTH_SECRET`, `AUTH_URL` e `DATABASE_URL` no ambiente. Google, Resend e Stripe são integrações opcionais no desenvolvimento local e exigem as respectivas credenciais em produção.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Banco de dados e migrações
 
-## Learn More
+A migração inicial versionada está em `prisma/migrations/20260922000000_baseline`. Num banco **vazio**, aplique:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx prisma migrate deploy
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Se o banco já foi criado com `prisma db push`, confira primeiro se o esquema corresponde ao arquivo Prisma. Só depois marque a migração inicial como aplicada, sem recriar tabelas:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npx prisma migrate diff --from-schema-datasource prisma/schema.prisma --to-schema-datamodel prisma/schema.prisma --exit-code
+npx prisma migrate resolve --applied 20260922000000_baseline
+```
 
-## Deploy on Vercel
+Faça backup antes de migrar um banco com dados reais. Nas próximas alterações, gere uma nova migração com `npx prisma migrate dev --name descricao`, revise o SQL e aplique em produção com `npx prisma migrate deploy`. `db push` é reservado ao banco local descartável.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Para vincular agendamentos antigos aos clientes e preencher duração/fuso, execute `npm run db:backfill` depois da migração. O script só atualiza registros incompletos e pode ser repetido.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## E-mail e assinatura
+
+- Cadastro por e-mail libera o acesso imediatamente, sem confirmação; senha mínima de 10 caracteres.
+- Para e-mails reais, configure `RESEND_API_KEY` e `RESEND_FROM` com domínio verificado.
+- Para a assinatura Pro, configure `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID` e `STRIPE_WEBHOOK_SECRET`.
+- Sem Resend, a recuperação de senha mostra um link local apenas em desenvolvimento. O agendamento continua salvo, mas não há confirmação por e-mail.
+
+## Verificação
+
+```bash
+npx tsc --noEmit
+npm run lint
+npm run build
+npm run test:e2e
+```
+
+A suíte E2E usa a instância Prisma local `agendaflow-e2e` na porta 51314 e apaga os dados **dessa instância** antes de cada execução. O servidor de desenvolvimento normal deve estar parado ao executá-la, pois o Next.js utiliza o mesmo diretório `.next`.

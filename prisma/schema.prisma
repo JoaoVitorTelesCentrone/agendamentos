@@ -1,0 +1,266 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+
+  accounts Account[]
+  sessions Session[]
+  business Business?
+}
+
+model Business {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  phone       String?
+  address     String?
+  timezone    String   @default("America/Sao_Paulo")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  /// Alíquota de imposto sobre o faturamento, em % (ex.: 6 = 6% do Simples).
+  taxRate     Decimal @default(0) @db.Decimal(5, 2)
+  /// Taxa média da maquininha de cartão, em % da receita.
+  cardFeeRate Decimal @default(0) @db.Decimal(5, 2)
+
+  plan                   Plan      @default(FREE)
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  services     Service[]
+  appointments Appointment[]
+  customers    Customer[]
+  availability Availability[]
+  availabilityExceptions AvailabilityException[]
+  transactions Transaction[]
+  insights     FinanceInsight[]
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  duration    Int
+  price       Decimal  @db.Decimal(10, 2)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  appointments Appointment[]
+}
+
+model Appointment {
+  id            String            @id @default(cuid())
+  customerName  String
+  customerEmail String
+  customerPhone String?
+  date          DateTime
+  endAt         DateTime?
+  timezone      String?
+  source        String            @default("PUBLIC_BOOKING")
+  customerId    String?
+  status        AppointmentStatus @default(PENDING)
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  events   AppointmentEvent[]
+
+  @@index([businessId, date])
+  @@index([customerId])
+}
+
+model AppointmentEvent {
+  id            String   @id @default(cuid())
+  type          AppointmentEventType
+  fromStatus    AppointmentStatus?
+  toStatus      AppointmentStatus?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([appointmentId, createdAt])
+}
+
+enum AppointmentEventType {
+  CREATED
+  STATUS_CHANGED
+  RESCHEDULED
+  CANCELLED
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@unique([businessId, email])
+  @@index([businessId, name])
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  type        TransactionType
+  description String
+  amount      Decimal         @db.Decimal(10, 2)
+  category    String
+  /// Só se aplica a despesas: separa o que escala com o volume de atendimentos
+  /// (insumos, comissão) do que o negócio paga independente de vender.
+  costType    CostType?
+  date        DateTime
+  recurring   Boolean         @default(false)
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, date])
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum CostType {
+  FIXED
+  VARIABLE
+}
+
+model FinanceInsight {
+  id        String   @id @default(cuid())
+  period    String
+  dataHash  String
+  content   String
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, period])
+}
+
+model Availability {
+  id        String  @id @default(cuid())
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  active    Boolean @default(true)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model AvailabilityException {
+  id        String   @id @default(cuid())
+  date      DateTime
+  type      AvailabilityExceptionType @default(BLOCK)
+  startTime String?
+  endTime   String?
+  reason    String?
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, date])
+}
+
+enum AvailabilityExceptionType {
+  BLOCK
+  OPEN
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model AuthRateLimit {
+  key          String    @id
+  hits         Int       @default(0)
+  resetAt      DateTime
+  blockedUntil DateTime?
+}
