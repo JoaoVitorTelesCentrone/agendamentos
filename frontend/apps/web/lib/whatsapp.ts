@@ -11,7 +11,7 @@ import { isDevMode } from "@/lib/otp"
 //      a Meta rejeita texto livre para mensagens iniciadas pela empresa.
 //   3. Com credenciais + Content SID  → envia por template aprovado pela Meta.
 //      É o único jeito aceito em produção para OTP/confirmação/lembrete, que
-//      são sempre iniciados pelo salão. Ver TWILIO_TEMPLATE_*_SID no .env.
+//      são sempre iniciados pelo negócio. Ver TWILIO_TEMPLATE_*_SID no .env.
 //
 // Trocar de provider (Meta WhatsApp Business API direta) = novo módulo.
 

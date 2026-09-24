@@ -56,7 +56,7 @@ function overlapMin(aStart: number, aEnd: number, bStart: number, bEnd: number):
   return Math.max(0, Math.min(aEnd, bEnd) - Math.max(aStart, bStart))
 }
 
-// Instante UTC → (weekday, minuto do dia) no fuso do salão.
+// Instante UTC → (weekday, minuto do dia) no fuso do negócio.
 function localParts(iso: string): { weekday: number; minOfDay: number } {
   const shifted = new Date(new Date(iso).getTime() - TZ_OFFSET_MS)
   return {

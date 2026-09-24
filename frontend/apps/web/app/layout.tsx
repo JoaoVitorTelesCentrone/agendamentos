@@ -6,9 +6,13 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@workspace/ui/lib/utils";
 
 export const metadata: Metadata = {
-  title: "VÍVIO — Sua agenda, seus clientes, seu jeito",
+  title: "AgendaFlow — Sua agenda, seus clientes, seu jeito",
   description:
-    "Agenda inteligente para salões e barbearias. Seus clientes agendam sozinhos pelo link, o CRM se preenche a cada horário e você vê quem sumiu — sem trabalho manual.",
+    "Agenda inteligente para profissionais de serviços. Seus clientes agendam pelo link, seus atendimentos ficam organizados e você acompanha sua operação em um só lugar.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 }
 
 const archivoHeading = Archivo({ subsets: ["latin"], variable: "--font-heading" })

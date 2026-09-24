@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Scissors, ArrowRight, Home } from "lucide-react"
+import { CalendarDays, ArrowRight, Home } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 
@@ -33,9 +33,9 @@ export default function NotFound() {
     <div className="flex min-h-svh flex-col items-center justify-center bg-background px-6 text-center">
       <Link href="/" className="mb-10 flex items-center gap-2">
         <span className="flex size-8 items-center justify-center bg-primary text-primary-foreground">
-          <Scissors className="size-4" />
+          <CalendarDays className="size-4" />
         </span>
-        <span className="font-heading text-lg tracking-tight">VÍVIO</span>
+        <span className="font-heading text-lg tracking-tight">AgendaFlow</span>
       </Link>
 
       <p className="font-heading text-7xl tracking-tight text-muted-foreground/40">

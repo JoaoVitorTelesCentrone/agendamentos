@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
   CalendarDays,
-  Scissors,
+  BriefcaseBusiness,
   Users,
   Contact,
   Lightbulb,
@@ -19,7 +19,7 @@ import {
 const items = [
   { href: "/painel", label: "Inicio", icon: LayoutDashboard, exact: true },
   { href: "/painel/agenda", label: "Agenda", icon: CalendarDays },
-  { href: "/painel/servicos", label: "Servicos", icon: Scissors },
+  { href: "/painel/servicos", label: "Servicos", icon: BriefcaseBusiness },
   { href: "/painel/profissionais", label: "Profissionais", icon: Users },
   { href: "/painel/clientes", label: "Clientes", icon: Contact },
   { href: "/painel/insights", label: "Insights", icon: Lightbulb },

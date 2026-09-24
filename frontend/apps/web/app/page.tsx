@@ -3,7 +3,7 @@ import {
   CalendarCheck,
   Clock,
   Link2,
-  Scissors,
+  CalendarDays,
   ShieldCheck,
   Users,
   BarChart3,
@@ -28,6 +28,7 @@ export default function Page() {
       <main className="flex-1">
         <Hero />
         <TrustStrip />
+        <ServiceTypes />
         <Problem />
         <Features />
         <HowItWorks />
@@ -82,9 +83,9 @@ function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2.5">
       <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-        <Scissors className="size-4" />
+        <CalendarDays className="size-4" />
       </span>
-      <span className="font-heading text-lg font-bold tracking-tight">VÍVIO</span>
+      <span className="font-heading text-lg font-bold tracking-tight">AgendaFlow</span>
     </Link>
   )
 }
@@ -101,16 +102,15 @@ function Hero() {
       <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.05fr_.95fr] lg:py-28">
         <Reveal className="flex flex-col items-start gap-6">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-secondary/80 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-secondary-foreground shadow-sm">
-            Para salões e barbearias
+            Para profissionais que atendem com hora marcada
           </span>
           <h1 className="max-w-3xl font-heading text-4xl leading-[1.04] font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
             Sua agenda lotada, <span className="text-gradient">sem WhatsApp</span> travando o dia inteiro.
           </h1>
           <p className="max-w-xl text-lg leading-8 text-muted-foreground text-pretty">
             Seus clientes agendam sozinhos pelo link e confirmam pelo WhatsApp.
-            A cada horário, seu cadastro de clientes cresce sozinho e a VÍVIO te
-            mostra quem sumiu e quanto isso custa. Menos faltas, menos trabalho
-            manual.
+            A cada atendimento, seu cadastro de clientes cresce e o AgendaFlow
+            ajuda você a reduzir faltas, organizar a rotina e acompanhar o negócio.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
@@ -147,9 +147,9 @@ function Hero() {
 // Mock do painel: agenda do dia + o insight com cifrão — o motivo de assinar.
 function HeroMock() {
   const slots = [
-    { time: "09:00", name: "Marina Alves", service: "Corte + Escova", pro: "Bia", status: "confirmado" },
-    { time: "10:30", name: "Rafael Lima", service: "Barba", pro: "Léo", status: "agendado" },
-    { time: "13:00", name: "Júlia Souza", service: "Coloração", pro: "Bia", status: "confirmado" },
+    { time: "09:00", name: "Marina Alves", service: "Consulta inicial", pro: "Dra. Ana", status: "confirmado" },
+    { time: "10:30", name: "Rafael Lima", service: "Avaliação física", pro: "Caio", status: "agendado" },
+    { time: "13:00", name: "Júlia Souza", service: "Sessão de terapia", pro: "Dra. Bia", status: "confirmado" },
     { time: "15:00", name: "Disponível", service: "—", pro: "", status: "livre" },
   ]
   return (
@@ -194,8 +194,8 @@ function HeroMock() {
         <Wallet className="size-5 shrink-0 text-money" />
         <p className="text-sm">
           <span className="font-heading text-lg font-bold tabular-nums">R$ 1.240</span>{" "}
-          parados em <span className="font-medium">9 clientes que sumiram</span>.
-          Chame de volta com um clique.
+          em oportunidades com <span className="font-medium">9 clientes inativos</span>.
+          Reative com uma mensagem pronta.
         </p>
       </div>
     </div>
@@ -230,7 +230,7 @@ function TrustStrip() {
   const stats = [
     { value: "Até 30%", label: "menos faltas com confirmação automática" },
     { value: "24/7", label: "agendamento sem depender de atendente" },
-    { value: "5 min", label: "para colocar seu salão no ar" },
+    { value: "5 min", label: "para colocar seu negócio no ar" },
   ]
   return (
     <section className="border-b border-border bg-muted/40">
@@ -248,6 +248,33 @@ function TrustStrip() {
   )
 }
 
+function ServiceTypes() {
+  const types = [
+    "Beleza",
+    "Saúde",
+    "Bem-estar",
+    "Pets",
+    "Aulas",
+    "Consultoria",
+    "Serviços técnicos",
+  ]
+
+  return (
+    <section aria-label="Profissionais atendidos pelo AgendaFlow" className="border-b border-border">
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-center gap-2.5 px-6 py-7 sm:justify-between">
+        <p className="mr-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+          Feito para diferentes áreas
+        </p>
+        {types.map((type) => (
+          <span key={type} className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground/80">
+            {type}
+          </span>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Problem                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -256,7 +283,7 @@ function Problem() {
   const pains = [
     "Cliente desiste porque ninguém respondeu o WhatsApp a tempo.",
     "Dois clientes marcados no mesmo horário, com o mesmo profissional.",
-    "Faltas sem aviso que deixam a cadeira vazia e o caixa no prejuízo.",
+    "Faltas sem aviso que deixam horários vazios e afetam o faturamento.",
     "Agenda no caderno ou na planilha que ninguém mais entende.",
   ]
   return (
@@ -298,12 +325,12 @@ function Features() {
     {
       icon: CalendarCheck,
       title: "Agenda sem conflitos",
-      desc: "Bloqueio automático de horário por profissional. Nada de dois clientes na mesma cadeira no mesmo minuto.",
+      desc: "Bloqueio automático de horários por profissional. Sem atendimentos sobrepostos na equipe.",
     },
     {
       icon: Wallet,
       title: "Insights com cifrão",
-      desc: "Quem sumiu, quanto isso vale, e em que dia e horário sua cadeira fica vazia. Números para agir, não gráficos para enfeitar.",
+      desc: "Veja clientes que não voltaram, horários ociosos e o desempenho dos seus serviços. Números para orientar suas decisões.",
     },
     {
       icon: Users,
@@ -318,7 +345,7 @@ function Features() {
     {
       icon: ShieldCheck,
       title: "Seus dados isolados",
-      desc: "Cada salão tem seu próprio ambiente seguro. Seus clientes e sua agenda só ficam com você.",
+      desc: "Cada negócio tem seu próprio espaço seguro. Seus clientes, equipe e agenda ficam organizados no mesmo lugar.",
     },
   ]
   return (
@@ -327,7 +354,7 @@ function Features() {
         <div className="max-w-2xl">
           <SectionLabel>Recursos</SectionLabel>
           <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-            Tudo que o salão precisa para organizar a agenda em um só lugar.
+            Tudo para organizar serviços, clientes e atendimentos em um só lugar.
           </h2>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -357,7 +384,7 @@ function HowItWorks() {
     {
       n: "01",
       title: "Crie sua conta",
-      desc: "Cadastre o salão, seus serviços e os profissionais. Leva poucos minutos.",
+      desc: "Cadastre seu negócio, os serviços ou atendimentos e sua equipe. Leva poucos minutos.",
     },
     {
       n: "02",
@@ -409,8 +436,7 @@ function PublicLink() {
             Funciona enquanto você atende
           </span>
           <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-            Enquanto você está com a tesoura na mão, sua agenda continua
-            enchendo.
+            Enquanto você atende, sua agenda continua recebendo horários.
           </h2>
           <p className="mt-4 max-w-md text-muted-foreground text-pretty">
             O link público trabalha por você 24 horas por dia. O cliente vê
@@ -424,13 +450,13 @@ function PublicLink() {
         <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <div className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 font-mono text-sm">
             <Link2 className="size-4 text-muted-foreground" />
-            vivio.app/seu-salao
+            agendaflow.app/seu-negocio
           </div>
           <div className="mt-4 space-y-3">
             {[
-              "Corte feminino · 45 min · R$ 80",
-              "Barba · 30 min · R$ 40",
-              "Coloração · 90 min · R$ 180",
+              "Saúde · Consulta inicial · 50 min",
+              "Aulas · Sessão individual · 60 min",
+              "Pets · Avaliação · 45 min",
             ].map((item) => (
               <div
                 key={item}
@@ -469,7 +495,7 @@ function Pricing() {
     },
     {
       name: "Pro",
-      description: "Para salões em crescimento",
+      description: "Para negócios de serviço em crescimento",
       price: "R$ 129",
       features: [
         "Até 3 unidades",
@@ -559,15 +585,15 @@ function Faq() {
   const faqs = [
     {
       q: "Preciso instalar alguma coisa?",
-      a: "Não. É tudo online. Você cria a conta, configura o salão e recebe um link para compartilhar com seus clientes.",
+      a: "Não. É tudo online. Você cria a conta, configura seu espaço de atendimento e recebe um link para compartilhar com seus clientes.",
     },
     {
       q: "Meus clientes precisam baixar um app?",
       a: "Não. Eles abrem o seu link no celular ou computador, escolhem serviço e horário e pronto.",
     },
     {
-      q: "Funciona para barbearia também?",
-      a: "Sim. Foi feito para salões e barbearias: serviços com preço e duração, vários profissionais e agenda individual.",
+      q: "Para quais tipos de profissionais serve?",
+      a: "Para quem trabalha com hora marcada: beleza, saúde, bem-estar, aulas, consultoria, serviços para pets e outras atividades. Você configura seus próprios serviços, durações, preços e equipe.",
     },
     {
       q: "E o WhatsApp e os lembretes?",
@@ -617,7 +643,7 @@ function FinalCta() {
     <section className="border-b border-border">
       <div className="mx-auto w-full max-w-6xl px-6 py-24 text-center">
         <h2 className="mx-auto max-w-2xl font-heading text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-          Comece hoje. Sua próxima cadeira vazia pode virar agendamento.
+          Comece hoje. Seu próximo horário livre pode virar atendimento.
         </h2>
         <p className="mx-auto mt-4 max-w-md text-muted-foreground text-pretty">
           Crie sua agenda online grátis e veja seus clientes marcando sozinhos
@@ -647,7 +673,7 @@ function SiteFooter() {
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 sm:flex-row">
         <Logo />
         <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} VÍVIO. Feito para salões e barbearias.
+          © {new Date().getFullYear()} AgendaFlow. Feito para quem trabalha com hora marcada.
         </p>
         <div className="flex gap-6 text-sm text-muted-foreground">
           <Link href={LOGIN_HREF} className="transition-colors hover:text-foreground">

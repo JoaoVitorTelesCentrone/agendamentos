@@ -16,7 +16,7 @@ export type QuizHandoff = {
   niche: string
   /** perda mensal estimada (centavos) */
   monthlyLossCents: number
-  /** o que a VÍVIO devolve por mês (centavos) */
+  /** valor estimado que o AgendaFlow pode recuperar por mês (centavos) */
   recoveredMonthlyCents: number
   /** horas/mês que voltam pro dono */
   hoursSaved: number

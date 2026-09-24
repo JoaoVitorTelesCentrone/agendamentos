@@ -1,4 +1,4 @@
--- Recursos do AgendaFlow incorporados ao schema multi-tenant do VÍVIO.
+-- Recursos do AgendaFlow incorporados ao schema multi-tenant.
 -- A migration é aditiva para preservar bancos já em uso.
 
 alter table tenants

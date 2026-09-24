@@ -95,7 +95,7 @@ async function PublicCatalog({
   if (services.length === 0 || professionals.length === 0) {
     return (
         <div className="rounded-2xl border border-border/80 bg-card p-10 text-center text-muted-foreground shadow-lg shadow-foreground/5">
-        Este salão ainda está configurando a agenda. Volte em breve.
+        Este espaço ainda está configurando a agenda. Volte em breve.
       </div>
     )
   }

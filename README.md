@@ -1,6 +1,6 @@
-# VÍVIO
+# AgendaFlow
 
-Aplicação de agendamentos multiempresa. A aplicação web canônica fica em `frontend/apps/web` e usa Next.js, Bun/Turbo e PostgreSQL.
+Aplicação de agendamentos multiempresa para profissionais de serviços em geral. A aplicação web canônica fica em `frontend/apps/web` e usa Next.js, Bun/Turbo e PostgreSQL.
 
 ## Desenvolvimento
 

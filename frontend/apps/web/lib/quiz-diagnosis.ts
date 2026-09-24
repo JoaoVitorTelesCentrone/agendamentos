@@ -1,5 +1,5 @@
 // Diagnóstico do funil público (/quiz): transforma as respostas do quiz em
-// dinheiro. É a mesma tese da página de Insights do painel — cadeira vazia ×
+// dinheiro. É a mesma tese da página de Insights do painel — horário vago ×
 // ticket médio — só que aplicada ANTES do cara ter conta, com os números que
 // ele mesmo informa.
 //
@@ -68,18 +68,18 @@ export type Lever = {
   detail: string
   /** perda estimada (centavos) — mensal p/ faltas e ociosidade, parado p/ sumidos */
   lossCents: number
-  /** quanto a VÍVIO recupera disso (centavos) */
+  /** quanto o AgendaFlow pode recuperar disso (centavos) */
   recoveredCents: number
   /** o recurso que resolve — o pitch, em uma linha */
   fix: string
 }
 
 export type Diagnosis = {
-  /** perda recorrente por mês: cadeira vazia que não volta (faltas + ociosidade) */
+  /** perda recorrente por mês: faltas + horários ociosos */
   monthlyLossCents: number
   /** dinheiro parado nos clientes que sumiram (estoque, não fluxo) */
   parkedCents: number
-  /** o que a VÍVIO devolve por mês, somando as alavancas recorrentes */
+  /** o que o AgendaFlow pode devolver por mês, somando as alavancas recorrentes */
   recoveredMonthlyCents: number
   /** recuperação de uma vez só, reativando quem sumiu */
   recoveredParkedCents: number
@@ -159,7 +159,7 @@ export function computeDiagnosis(answers: Record<string, string>): Diagnosis | n
           : "Sua agenda enche sozinha. Raro.",
       lossCents: idleLoss,
       recoveredCents: roundMoney(idleLoss * RECOVERY.idle),
-      fix: "Link público agendando 24h por dia — inclusive quando você está com a tesoura na mão. O painel mostra em que dia e período a cadeira fica parada.",
+      fix: "Link público agendando 24h por dia, mesmo enquanto você está atendendo. O painel mostra em que dias e períodos sua agenda fica ociosa.",
     },
     {
       key: "sumidos",
@@ -170,7 +170,7 @@ export function computeDiagnosis(answers: Record<string, string>): Diagnosis | n
           : "Sua clientela está voltando sozinha.",
       lossCents: parked,
       recoveredCents: roundMoney(parked * RECOVERY.lost),
-      fix: "A VÍVIO te entrega a lista de quem sumiu e a mensagem pronta. Um clique e o WhatsApp abre com o texto escrito.",
+      fix: "O AgendaFlow mostra clientes que não voltaram e prepara uma mensagem de reativação. Um clique abre o WhatsApp com o texto pronto.",
     },
   ]
 

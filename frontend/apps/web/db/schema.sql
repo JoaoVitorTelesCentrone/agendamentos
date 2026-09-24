@@ -1,4 +1,4 @@
--- VÍVIO — schema inicial para PostgreSQL comum.
+-- AgendaFlow — schema inicial para PostgreSQL comum.
 -- Derivado das migrations do Supabase, SEM as dependências da stack Supabase:
 --   * sem auth.users  → tabela auth_users própria (email + hash de senha)
 --   * sem RLS/policies → o isolamento por tenant é feito no app (lib/db/client.ts)

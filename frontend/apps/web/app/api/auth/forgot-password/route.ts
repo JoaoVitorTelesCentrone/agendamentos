@@ -68,8 +68,8 @@ export async function POST(request: Request) {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from, to: [email], subject: "Redefina sua senha do VÍVIO",
-      html: `<p>Recebemos um pedido para trocar a senha da sua conta VÍVIO.</p><p><a href="${link.toString()}">Criar uma nova senha</a></p><p>O link expira em uma hora. Se não foi você, ignore este e-mail.</p>`,
+      from, to: [email], subject: "Redefina sua senha do AgendaFlow",
+      html: `<p>Recebemos um pedido para trocar a senha da sua conta AgendaFlow.</p><p><a href="${link.toString()}">Criar uma nova senha</a></p><p>O link expira em uma hora. Se não foi você, ignore este e-mail.</p>`,
     }),
   }).catch(() => null)
   if (!response?.ok) {

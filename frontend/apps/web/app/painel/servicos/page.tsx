@@ -26,7 +26,7 @@ export default async function ServicosPage() {
     <div>
       <h1 className="font-heading text-2xl tracking-tight">Serviços</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        O que seu salão oferece — nome, duração e preço.
+        O que seu negócio oferece — nome, duração e preço.
       </p>
       <div className="mt-8">
         <ServicosClient

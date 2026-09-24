@@ -1,4 +1,4 @@
-# Plano de integração — VÍVIO + AgendaFlow
+# Plano de integração — AgendaFlow
 
 ## Objetivo
 
@@ -7,14 +7,14 @@ Consolidar os dois projetos em uma única aplicação e um único repositório G
 ## Decisão de arquitetura
 
 - **Base canônica:** projeto externo em `frontend/apps/web`.
-- **Produto e marca:** VÍVIO.
+- **Produto e marca:** AgendaFlow, para profissionais de serviços em geral.
 - **Repositório canônico:** `JoaoVitorTelesCentrone/agendamentos`.
 - **Frontend:** Next.js 16 no monorepo Bun/Turbo existente.
 - **Banco:** PostgreSQL e migrations SQL do projeto externo.
 - **Autenticação:** sessão/JWT e `auth_users` do projeto externo, ampliados com recuperação e verificação de e-mail.
 - **Multiempresa:** `tenants`, `profiles` e escopo obrigatório por `tenant_id`.
 - **Deploy:** Docker Compose, Caddy e PostgreSQL próprio já documentados no projeto externo.
-- **Código a portar:** regras de negócio e fluxos do AgendaFlow, reescritos para o modelo do VÍVIO.
+- **Código a portar:** regras de negócio e fluxos do AgendaFlow externo, adaptados à aplicação canônica.
 - **Código a aposentar:** Prisma, Auth.js, `package-lock.json` e a aplicação Next.js interna depois que seus recursos forem migrados e validados.
 
 Essa escolha evita manter dois ORMs, dois gerenciadores de pacotes, dois sistemas de sessão e duas representações incompatíveis da mesma empresa e do mesmo agendamento.
@@ -23,7 +23,7 @@ Essa escolha evita manter dois ORMs, dois gerenciadores de pacotes, dois sistema
 
 ### O projeto externo já entrega melhor
 
-- identidade visual VÍVIO e componentes compartilhados;
+- identidade visual externa e componentes compartilhados, com posicionamento amplo para prestadores de serviço;
 - multiempresa e papéis de usuário;
 - profissionais e vínculo entre profissional e serviço;
 - prevenção de choque de horários no próprio PostgreSQL;
@@ -48,11 +48,11 @@ Essa escolha evita manter dois ORMs, dois gerenciadores de pacotes, dois sistema
 
 ### Recursos sobrepostos
 
-Serviços, clientes, agenda, disponibilidade, configurações, dashboard e agendamento público existem nos dois projetos. Nesses casos, a tela e o modelo do VÍVIO permanecem; somente comportamentos comprovadamente melhores do AgendaFlow são incorporados.
+Serviços, clientes, agenda, disponibilidade, configurações, dashboard e agendamento público existem nos dois projetos. A aplicação canônica mantém a estrutura visual externa, agora com a marca AgendaFlow e comunicação voltada a profissionais de serviços em geral.
 
 ## Contrato visual
 
-As novas áreas devem parecer partes do VÍVIO desde o primeiro commit:
+As áreas devem seguir a identidade do AgendaFlow e funcionar para diferentes tipos de prestadores:
 
 - **Cores:** continuar usando os tokens atuais em OKLCH: papel quente, verde tinta, acento quente, `money`, `success` e estados destrutivos.
 - **Tipografia:** Archivo em títulos, Instrument Sans na interface e Geist Mono apenas onde números técnicos se beneficiem disso.
@@ -65,7 +65,7 @@ Revisão do direcionamento: o sistema atual já usa gradientes, cartões arredon
 
 ## Mapeamento de dados
 
-| AgendaFlow | Destino no VÍVIO | Tratamento |
+| AgendaFlow | Destino na aplicação canônica | Tratamento |
 |---|---|---|
 | `User` | `auth_users` + `profiles` | Adicionar campos de verificação e recuperação; manter UUID. |
 | `Business` | `tenants` | Acrescentar descrição, telefone, endereço, fuso e parâmetros financeiros. |
@@ -107,7 +107,7 @@ Todas as mudanças serão migrations aditivas. Nenhuma migration deve apagar ou 
 ### Fase 2 — Unificar o modelo de dados
 
 1. Criar migrations aditivas para identidade, clientes, auditoria, disponibilidade, financeiro e assinatura.
-2. Criar adaptadores temporários de importação do modelo Prisma para o modelo VÍVIO.
+2. Criar adaptadores temporários de importação do modelo Prisma para o modelo canônico.
 3. Definir conversões de status, CUID para UUID, datas/fusos e decimal para centavos.
 4. Executar a importação primeiro em banco descartável e produzir relatório de contagens e rejeições.
 5. Validar constraints de tenant e de conflito de horários após a importação.
@@ -126,9 +126,9 @@ Todas as mudanças serão migrations aditivas. Nenhuma migration deve apagar ou 
 
 ### Fase 4 — Agenda e operação
 
-1. Comparar o fluxo público dos dois projetos e manter o wizard visual do VÍVIO.
+1. Comparar o fluxo público dos dois projetos e manter o wizard visual da aplicação canônica.
 2. Incorporar exceções de disponibilidade, agendamento manual, filtros e histórico do agendamento.
-3. Preservar profissionais, serviço por profissional, OTP, leads e notificações do VÍVIO.
+3. Preservar profissionais, serviço por profissional, OTP, leads e notificações existentes.
 4. Centralizar cálculo de slots, fuso horário e validação de choque em módulos compartilhados.
 5. Garantir idempotência na criação e nos webhooks relacionados a agendamentos.
 
@@ -136,7 +136,7 @@ Todas as mudanças serão migrations aditivas. Nenhuma migration deve apagar ou 
 
 ### Fase 5 — Financeiro, marketing e insights
 
-1. Portar receitas e despesas para `/painel/financeiro` com componentes VÍVIO.
+1. Portar receitas e despesas para `/painel/financeiro` com os componentes visuais existentes.
 2. Gerar receita a partir de atendimento concluído sem duplicar transações.
 3. Portar indicadores de imposto, taxa de cartão, custos fixos e variáveis.
 4. Portar os insights com IA como recurso opcional e com cache por período.
@@ -150,13 +150,13 @@ Todas as mudanças serão migrations aditivas. Nenhuma migration deve apagar ou 
 2. Criar checkout, portal do cliente e webhook sobre a nova tabela `subscriptions`.
 3. Verificar assinatura de webhook e tornar o processamento idempotente.
 4. Aplicar permissões no servidor, além de esconder ações na interface.
-5. Integrar o estado da assinatura à identidade visual e às mensagens do VÍVIO.
+5. Integrar o estado da assinatura à identidade visual e às mensagens do AgendaFlow.
 
 **Saída:** upgrade, renovação, falha de pagamento e cancelamento atualizam o tenant corretamente.
 
 ### Fase 7 — Qualidade e lançamento
 
-1. Adaptar a suíte E2E do AgendaFlow para os caminhos e seletores do VÍVIO.
+1. Adaptar a suíte E2E do AgendaFlow para os caminhos e seletores da aplicação canônica.
 2. Cobrir cadastro, login, configuração inicial, serviços, profissionais, disponibilidade, agenda, fluxo público, clientes, financeiro e assinatura.
 3. Validar desktop e mobile nas larguras usadas pelo produto.
 4. Fazer ensaio de backup, migration e restauração em ambiente isolado.
@@ -197,7 +197,7 @@ Cada PR deve incluir migration reversível ou plano de rollback, capturas das te
 - não é possível reservar horários sobrepostos para o mesmo profissional;
 - Stripe e notificações toleram reentrega sem duplicar efeitos;
 - os fluxos principais possuem cobertura E2E;
-- as novas telas seguem os tokens e componentes do VÍVIO;
+- as telas seguem os tokens e componentes do AgendaFlow e a comunicação atende a vários segmentos de serviço;
 - o histórico original do AgendaFlow continua recuperável no GitHub;
 - backup e restauração foram ensaiados antes do lançamento.
 

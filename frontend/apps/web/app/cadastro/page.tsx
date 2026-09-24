@@ -33,7 +33,7 @@ export default function CadastroPage() {
     e.preventDefault()
     setError(null)
     const form = new FormData(e.currentTarget)
-    const salao = String(form.get("salao") ?? "").trim()
+    const businessName = String(form.get("business_name") ?? "").trim()
     const nome = String(form.get("nome") ?? "").trim()
     const email = String(form.get("email") ?? "").trim()
     const password = String(form.get("password") ?? "")
@@ -49,7 +49,7 @@ export default function CadastroPage() {
 
     setLoading(true)
     try {
-      await register({ salao, nome, email, password, niche: handoff?.niche })
+      await register({ businessName, nome, email, password, niche: handoff?.niche })
       clearHandoff()
       router.refresh()
       router.push("/painel")
@@ -67,7 +67,7 @@ export default function CadastroPage() {
       subtitle={
         recovered > 0
           ? "Quatro campos e sua agenda entra no ar — já com seus serviços cadastrados."
-          : "Configure seu salão em poucos minutos. Sem cartão de crédito."
+          : "Configure seu negócio em poucos minutos. Sem cartão de crédito."
       }
       footer={
         <>
@@ -103,10 +103,10 @@ export default function CadastroPage() {
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <FormError message={error} />
         <TextField
-          label="Nome do salão"
-          name="salao"
+          label="Nome do negócio ou espaço de atendimento"
+          name="business_name"
           type="text"
-          placeholder="Studio Bella"
+          placeholder="Studio Aurora ou Clínica Horizonte"
           autoComplete="organization"
           required
         />
@@ -122,7 +122,7 @@ export default function CadastroPage() {
           label="E-mail"
           name="email"
           type="email"
-          placeholder="voce@salao.com"
+          placeholder="voce@seunegocio.com.br"
           autoComplete="email"
           required
         />

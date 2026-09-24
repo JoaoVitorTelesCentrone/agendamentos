@@ -26,7 +26,7 @@ function slugify(input: string): string {
 
 export async function POST(request: Request) {
   let body: {
-    salao?: string
+    businessName?: string
     nome?: string
     email?: string
     password?: string
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Requisicao invalida." }, { status: 400 })
   }
 
-  const salao = (body.salao ?? "").trim()
+  const businessName = (body.businessName ?? "").trim()
   const nome = (body.nome ?? "").trim()
   const email = (body.email ?? "").trim().toLowerCase()
   const password = body.password ?? ""
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   const rawNiche = (body.niche ?? "").trim()
   const niche = isKnownNiche(rawNiche) ? rawNiche : "outro"
 
-  if (!salao || nome.length < 2 || !email || password.length < 6) {
+  if (!businessName || nome.length < 2 || !email || password.length < 6) {
     return NextResponse.json({ error: "Dados incompletos." }, { status: 400 })
   }
 
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
   }
 
   // slug unico a partir do nome do salao
-  const base = slugify(salao) || "salao"
+  const base = slugify(businessName) || "agenda"
   let slug = base
   for (let i = 0; i < 50; i++) {
     const rows = await query<{ id: string }>(
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     const tenantRows = await query<{ id: string; slug: string }>(
       `insert into tenants (name, slug, niche, status)
        values ($1, $2, $3, $4) returning id, slug`,
-      [salao, slug, niche, "trial"]
+      [businessName, slug, niche, "trial"]
     )
     const tenant = tenantRows[0]
     tenantId = tenant?.id ?? null

@@ -1,4 +1,4 @@
-# VÍVIO em PostgreSQL próprio
+# AgendaFlow em PostgreSQL próprio
 
 ## Plano
 

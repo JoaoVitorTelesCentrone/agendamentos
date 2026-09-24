@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { Plus, Trash2, Clock, Scissors } from "lucide-react"
+import { Plus, Trash2, Clock, BriefcaseBusiness } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 import { Field } from "@/components/ui-form"
@@ -292,7 +292,7 @@ function ServicesEditor({
   return (
     <div>
       <h3 className="mb-3 flex items-center gap-2 text-sm font-medium">
-        <Scissors className="size-4" /> Serviços que executa
+        <BriefcaseBusiness className="size-4" /> Serviços que executa
       </h3>
       {services.length === 0 ? (
         <p className="text-sm text-muted-foreground">

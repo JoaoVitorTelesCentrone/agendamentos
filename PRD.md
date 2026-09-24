@@ -2,7 +2,7 @@
 
 > **Versão:** Final consolidada
 > **Data:** 2026-06-28
-> **Vertical âncora:** Salões de beleza e barbearias (estética)
+> **Público principal:** Profissionais de serviços que trabalham com hora marcada
 > **Estratégia de MVP:** Mínimo vendável agora — escopo ultra-enxuto
 > **Canal:** Venda direta pela software house (revenda/white-label completo só na V2)
 > **Stack:** Next.js + TypeScript + Supabase (PostgreSQL + Auth + Storage + RLS) + Tailwind
@@ -14,40 +14,40 @@
 
 | Decisão | Escolha | Implicação prática |
 |---|---|---|
-| Vertical âncora | Salões/estética | Mensagem comercial focada; núcleo horizontal, mas copy e templates de salão. |
+| Público atendido | Beleza, saúde, bem-estar, pets, aulas, consultoria e serviços técnicos | Produto e comunicação transversais; cada profissional configura seus serviços, horários e equipe. |
 | Prazo / escopo MVP | "Agora" — ultra-enxuto | Cortar widget embed, multiunidade, dashboard avançado e billing automático do MVP. |
 | Canal | Venda direta | White-label completo, domínio próprio e portal de revendedor → V2. |
 | Multi-tenancy | `tenant_id` + Supabase RLS | Toda tabela operacional com `tenant_id`; políticas RLS obrigatórias. |
 | Billing inicial | Manual | Plano e status geridos no painel Super Admin; cobrança fora do sistema. |
 | Notificações MVP | Apenas e-mail | WhatsApp/SMS ficam para V1. |
 
-**O que o MVP entrega para vender já:** um salão cria a conta, cadastra serviços e profissionais, publica um link público, o cliente final agenda sozinho, recebe confirmação por e-mail, e o salão gerencia tudo num painel com agenda e um dashboard simples — tudo isolado por tenant, com Super Admin controlando planos e limites manualmente.
+**O que o MVP entrega para vender já:** um profissional cria a conta, cadastra seus serviços e equipe, publica um link público, o cliente agenda sozinho, recebe confirmação e o profissional acompanha tudo num painel com agenda e visão da operação — cada negócio isolado por tenant.
 
 ---
 
 ## 1. Visão Geral do Produto
 
 ### Problema
-Salões e barbearias gerenciam agenda por WhatsApp, caderno ou planilha. Isso gera: conflitos de horário, perda de cliente por demora na resposta, trabalho manual do atendente, ausência de confirmação automática, no-show sem controle e nenhuma visão de ocupação/faturamento.
+Profissionais de beleza, saúde, bem-estar, educação, consultoria, serviços para pets e outras atividades gerenciam horários por WhatsApp, caderno ou planilha. Isso gera: conflitos de horário, perda de clientes por demora na resposta, trabalho manual, ausência de confirmação automática, faltas sem controle e pouca visão de ocupação e faturamento.
 
 Para a software house, vender projeto sob demanda não escala. Um SaaS multi-tenant white-label gera receita recorrente reaproveitando a mesma base.
 
 ### Proposta de Valor
-- **Para o salão:** plataforma de agendamento online para organizar clientes, horários, equipe e confirmações em um só lugar, reduzindo no-show e trabalho manual.
+- **Para o profissional:** plataforma de agendamento online para organizar clientes, serviços, horários, equipe e confirmações em um só lugar, reduzindo faltas e trabalho manual.
 - **Para a software house:** SaaS multi-tenant, monetizável por assinatura mensal, com base preparada para white-label/revenda no futuro.
 
 ### Diferenciais
-- **vs Calendly:** voltado a operação de salão (profissionais, serviços com preço/duração, clientes finais, no-show), não só reuniões.
-- **vs Trinks:** base licenciável/white-label e flexível para outros verticais depois.
+- **vs Calendly:** voltado à operação de serviços recorrentes (equipe, serviços com preço/duração, clientes finais e faltas), não só reuniões.
+- **vs Trinks:** base horizontal para diferentes segmentos de serviços, com configuração por negócio.
 - **vs SimplesVet:** não tenta ser ERP/sistema clínico; foco em agenda, disponibilidade e recorrência SaaS.
 
 ---
 
 ## 2. Personas
 
-- **Dono/Gestor do salão** — compra e decide renovar. Quer menos trabalho manual, mais ocupação, menos no-show e visão de faturamento.
+- **Dono/Gestor do negócio** — compra e decide renovar. Quer menos trabalho manual, mais ocupação, menos faltas e visão de faturamento.
 - **Atendente/Recepcionista** — opera o dia a dia. Cria, remarca e cancela rápido; evita conflitos; registra no-show.
-- **Profissional (cabeleireiro/barbeiro/manicure)** — tem agenda própria. Vê o dia, sabe quem atende, registra conclusão/ausência, bloqueia horários.
+- **Profissional da equipe** — tem agenda própria. Vê o dia, sabe quem atende, registra conclusão/ausência e bloqueia horários.
 - **Cliente final** — agenda sem esperar resposta no WhatsApp; recebe confirmação; remarca/cancela quando permitido.
 - **Super Admin (software house)** — cria tenants, define planos/limites e dá suporte.
 
@@ -70,7 +70,7 @@ Alternativa futura (V2): schema por tenant para clientes enterprise/franquia.
 
 ### Hierarquia
 `Tenant > (Unidade — V2) > Profissional > Agenda`
-No MVP de salão assume-se **1 unidade por tenant** (campo `unit` existe no modelo, mas a UI de multiunidade fica para V2).
+No MVP assume-se **1 unidade por negócio** (a UI de multiunidade fica para V2).
 
 ### Customização por tenant
 **[MVP]** nome comercial, logo, cor primária, subdomínio (`salaox.sistema.com`), horário de funcionamento, serviços, profissionais, política básica de cancelamento, página pública de agendamento.
@@ -99,7 +99,7 @@ No MVP de salão assume-se **1 unidade por tenant** (campo `unit` existe no mode
 **[V2]** templates por segmento, wizard com recomendações, importação CSV de clientes, onboarding assistido por tarefas internas.
 
 ### b) Gestão de serviços
-**[MVP]** criar/editar/ativar/desativar; campos: nome, descrição, categoria, duração, preço, tipo (presencial no MVP de salão), profissionais habilitados; serviço pode exigir profissional específico ou aceitar "qualquer disponível".
+**[MVP]** criar/editar/ativar/desativar; campos: nome, descrição, categoria, duração, preço, modalidade e profissionais habilitados; serviço pode exigir profissional específico ou aceitar "qualquer disponível".
 **[V2]** pacotes, serviços compostos, duração variável por profissional, comissão por serviço, campos por vertical.
 
 ### c) Gestão de profissionais
@@ -169,12 +169,12 @@ No MVP de salão assume-se **1 unidade por tenant** (campo `unit` existe no mode
 ## 5. Fluxos Principais
 
 ### Fluxo 1 — Criação de tenant
-**User story:** Como dono de salão, quero criar minha conta e configurar meu salão para começar a receber agendamentos online.
+**User story:** Como prestador de serviço, quero criar minha conta e configurar meu negócio para começar a receber agendamentos online.
 
 ```gherkin
 Cenário: Criação self-service de tenant
   Dado que um visitante acessa a página de cadastro
-  Quando ele informa nome do salão, nome do responsável, e-mail e senha
+  Quando informa o nome do negócio, nome do responsável, e-mail e senha
   Então o sistema deve criar um tenant com status "trial"
   E deve criar um usuário com papel "admin" via Supabase Auth
   E deve gerar um subdomínio único
@@ -182,7 +182,7 @@ Cenário: Criação self-service de tenant
 
 Cenário: Criação assistida pelo Super Admin
   Dado que um Super Admin está autenticado
-  Quando ele cria um tenant informando nome do salão, plano, responsável e e-mail do admin
+  Quando cria um tenant informando nome do negócio, plano, responsável e e-mail do admin
   Então o sistema deve criar o tenant no plano selecionado
   E deve enviar convite ao admin do tenant
   E deve registrar a ação em audit_log
@@ -195,7 +195,7 @@ Cenário: Subdomínio já existente
 ```
 
 ### Fluxo 2 — Agendamento do cliente final
-**User story:** Como cliente final, quero acessar o link do salão e reservar um horário disponível sem falar com um atendente.
+**User story:** Como cliente final, quero acessar o link do prestador e reservar um horário disponível sem esperar uma resposta.
 
 ```gherkin
 Cenário: Cliente final agenda com sucesso
@@ -270,7 +270,7 @@ Critérios objetivos:
 > Todas as tabelas operacionais têm `tenant_id` + RLS. Tipos sugeridos para Postgres/Supabase.
 
 ### Entidades principais
-- **tenant** — empresa cliente (salão). Campos white-label (nome, logo_url, cor_primaria, subdominio, horario_funcionamento), status.
+- **tenant** — negócio cliente. Campos configuráveis (nome, logo_url, cor_primaria, endereço, fuso e status).
 - **user** — usuário admin/operacional (ligado a `auth.users` do Supabase). Papel via **role**.
 - **professional** — quem executa o serviço. Liga a tenant, service, appointment, availability_rule.
 - **service** — serviço agendável (nome, duração, preço, tipo, profissionais habilitados).
@@ -321,8 +321,8 @@ Critérios objetivos:
 
 ## 8. Modelo de Monetização
 
-### Planos sugeridos (foco salão)
-**Starter** — pequenos salões: 1 unidade, até 3 usuários, até 3 profissionais, até 300 agendamentos/mês, link público, e-mail de confirmação, dashboard básico.
+### Planos sugeridos (profissionais e equipes de serviços)
+**Starter** — pequenos negócios de serviço: 1 unidade, até 3 usuários, até 3 profissionais, até 300 agendamentos/mês, link público, confirmação e visão básica da agenda.
 **Pro** — em crescimento: até 3 unidades, até 15 usuários, até 15 profissionais, até 2.000 agendamentos/mês, lembretes automáticos (V1), relatórios, widget embed (V1), personalização visual básica.
 **Business** — operações maiores: até 10 unidades, até 50 usuários, até 50 profissionais, agendamentos altos/ilimitados com uso justo, permissões avançadas, API/webhooks (V1+), integrações, suporte prioritário, domínio próprio (V2).
 
@@ -336,7 +336,7 @@ Critérios objetivos:
 
 ## 9. Roadmap
 
-### MVP — Vender Já (escopo "agora", recortado para salão + venda direta)
+### MVP — Vender Já (escopo "agora", para serviços com hora marcada + venda direta)
 Multi-tenant com `tenant_id` + RLS · Painel Super Admin · Criação de tenant (self-service + assistida) · Planos manuais · Login (Supabase Auth) · Papéis básicos (admin, atendente, profissional, super admin) · Serviços · Profissionais · Clientes finais (CRM básico) · Agenda interna · **Link público de agendamento** · Disponibilidade simples · **Confirmação por e-mail** · Cancelamento/remarcação pelo painel · Dashboard básico · Logo, cor e subdomínio por tenant.
 *Cortes explícitos do MVP "agora":* widget embed → V1, multiunidade/gestor de unidade → V2, dashboard avançado → V1, billing automático → V1, WhatsApp/SMS → V1, white-label completo → V2.
 
@@ -350,13 +350,13 @@ Domínio próprio · White-label completo · Portal de revendedor · API públic
 
 ## 10. Riscos e Mitigações
 
-**R1 — Produto genérico demais.** Salão, clínica e academia diferem. *Mitigação:* núcleo horizontal (serviços, profissionais, clientes, agenda, notificações) + venda focada em **salão/estética** primeiro; clínicas só depois e sem prontuário/convênio.
+**R1 — Produto genérico demais.** Cada área tem rotinas próprias. *Mitigação:* manter o núcleo horizontal (serviços, profissionais, clientes, agenda e notificações) e permitir que cada negócio configure seus próprios serviços; prontuários, convênios e sistemas especializados ficam fora do escopo.
 
 **R2 — Vazamento entre tenants.** Falha crítica de SaaS. *Mitigação:* `tenant_id` obrigatório + **RLS do Supabase**, testes automatizados de acesso cross-tenant, operações sensíveis só com `service_role` server-side, `audit_log` em ações sensíveis.
 
 **R3 — Complexidade de disponibilidade.** Folgas, bloqueios, recursos, recorrência escalam rápido. *Mitigação:* MVP usa disponibilidade simples (horário do tenant + horário do profissional + duração do serviço + bloqueios + agendamentos existentes). Recursos, deslocamento e recorrência → V2.
 
-**R4 — Dependência de WhatsApp.** Salões esperam WhatsApp. *Mitigação:* MVP com e-mail; WhatsApp na V1 vendido como evolução próxima; vender MVP para salões que aceitam link + e-mail.
+**R4 — Dependência de WhatsApp.** Muitos profissionais esperam WhatsApp. *Mitigação:* oferecer confirmação por e-mail e WhatsApp conforme a configuração, sem limitar o produto a um segmento.
 
 **R5 — Billing complexo cedo demais.** *Mitigação:* MVP com plano/status manuais; software house cobra fora do sistema; automação na V1.
 
@@ -366,7 +366,7 @@ Domínio próprio · White-label completo · Portal de revendedor · API públic
 
 ## Recomendação Final
 
-Vender o MVP como: **"Plataforma de agendamentos online para salões e barbearias organizarem clientes, equipe e horários, com confirmação automática por e-mail e gestão multi-tenant para a software house."**
+Vender o MVP como: **"AgendaFlow organiza horários, clientes, serviços e equipe para profissionais que atendem com hora marcada — da beleza e saúde a aulas, consultoria e serviços técnicos."**
 
 Entregar agora, no menor escopo vendável:
 1. Tenant isolado (RLS).
@@ -378,4 +378,4 @@ Entregar agora, no menor escopo vendável:
 7. Painel Super Admin.
 8. Planos e limites manuais.
 
-O produto nasce flexível para múltiplos verticais, mas a **venda inicial é focada em salão/estética e direta** — isso reduz escopo, melhora a mensagem comercial e acelera a validação do SaaS.
+O AgendaFlow atende profissionais de diferentes áreas que trabalham com hora marcada. O núcleo comum organiza agenda, clientes, equipe e serviços sem presumir um segmento específico.

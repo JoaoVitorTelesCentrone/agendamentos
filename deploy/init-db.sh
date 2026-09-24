@@ -4,7 +4,7 @@ export PGPASSWORD="$(cat "$PGPASSWORD_FILE")"
 
 table_count="$(psql -X -At -v ON_ERROR_STOP=1 -c "select count(*) from pg_tables where schemaname = 'public'")"
 if [ "$table_count" -eq 0 ]; then
-  echo 'Initializing an empty VÍVIO database.'
+  echo 'Initializing an empty AgendaFlow database.'
   psql -X -v ON_ERROR_STOP=1 -1 -f /schema.sql
 else
   missing="$(psql -X -At -v ON_ERROR_STOP=1 -c "
@@ -18,7 +18,7 @@ else
     exit 1
   fi
   psql -X -v ON_ERROR_STOP=1 -1 -f /quiz.sql
-  echo 'Existing VÍVIO database verified.'
+  echo 'Existing AgendaFlow database verified.'
 fi
 
 psql -X -v ON_ERROR_STOP=1 -1 -f /request-limits.sql

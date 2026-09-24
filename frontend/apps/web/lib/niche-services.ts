@@ -45,6 +45,22 @@ const CATALOGS: Record<string, NicheService[]> = {
     { name: "Aula personalizada", duration_min: 60, price_cents: 12000 },
     { name: "Avaliação física", duration_min: 45, price_cents: 10000 },
   ],
+  pets: [
+    { name: "Consulta veterinária", duration_min: 45, price_cents: 16000 },
+    { name: "Banho e cuidados", duration_min: 60, price_cents: 9000 },
+  ],
+  educacao: [
+    { name: "Aula individual", duration_min: 60, price_cents: 10000 },
+    { name: "Aula experimental", duration_min: 45, price_cents: 7000 },
+  ],
+  consultoria: [
+    { name: "Sessão de consultoria", duration_min: 60, price_cents: 20000 },
+    { name: "Reunião inicial", duration_min: 30, price_cents: 0 },
+  ],
+  reparos: [
+    { name: "Avaliação do serviço", duration_min: 30, price_cents: 5000 },
+    { name: "Atendimento técnico", duration_min: 90, price_cents: 15000 },
+  ],
   outro: [{ name: "Atendimento", duration_min: 60, price_cents: 10000 }],
 }
 

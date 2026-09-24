@@ -40,7 +40,7 @@ export default function EntrarPage() {
   return (
     <AuthShell
       title="Entrar"
-      subtitle="Acesse o painel do seu salão."
+      subtitle="Acesse sua agenda e gerencie seus atendimentos."
       footer={
         <>
           Ainda não tem conta?{" "}
@@ -56,7 +56,7 @@ export default function EntrarPage() {
           label="E-mail"
           name="email"
           type="email"
-          placeholder="voce@salao.com"
+          placeholder="voce@seunegocio.com.br"
           autoComplete="email"
           required
         />

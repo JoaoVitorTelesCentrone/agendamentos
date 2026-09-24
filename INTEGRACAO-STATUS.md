@@ -1,6 +1,6 @@
-# Integração VÍVIO + AgendaFlow
+# Integração AgendaFlow
 
-O VÍVIO em `frontend/apps/web` é a aplicação canônica. A branch `archive/agendaflow-standalone` preserva no GitHub o snapshot do app AgendaFlow antes da incorporação. O trabalho integrado está na branch `integration/unificar-produtos`.
+O AgendaFlow em `frontend/apps/web` é a aplicação canônica, com identidade para profissionais de serviços em geral. A branch `archive/agendaflow-standalone` preserva no GitHub o snapshot anterior à incorporação. O trabalho integrado está na branch `integration/unificar-produtos`.
 
 ## Entregue nesta etapa
 
@@ -11,7 +11,7 @@ O VÍVIO em `frontend/apps/web` é a aplicação canônica. A branch `archive/ag
 - Exceções de disponibilidade, trilha de auditoria de agendamentos e limite de três serviços no plano gratuito.
 - Stripe Checkout, portal de cobrança e webhook assinado com registro idempotente.
 - Migrações de atualização integradas ao bootstrap Docker e script `migrate:upgrades` para uso local.
-- Layout das novas áreas seguindo os componentes e tokens do VÍVIO.
+- Layout das novas áreas seguindo os componentes e tokens visuais da aplicação externa.
 
 ## Configuração externa necessária
 

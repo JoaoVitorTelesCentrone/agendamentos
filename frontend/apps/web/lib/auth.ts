@@ -3,7 +3,7 @@
 // o cookie de sessão (JWT) falando com a Neon.
 
 export async function register(input: {
-  salao: string
+  businessName: string
   nome: string
   email: string
   password: string

@@ -7,7 +7,7 @@ import {
   CalendarCheck,
   CalendarRange,
   Receipt,
-  Scissors,
+  BriefcaseBusiness,
 } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/server"
@@ -253,7 +253,7 @@ export default async function InsightsPage({
       {/* Serviços mais procurados */}
       <div className="mt-8">
         <h2 className="mb-3 flex items-center gap-2 font-medium">
-          <Scissors className="size-4" /> Serviços mais procurados (90 dias)
+          <BriefcaseBusiness className="size-4" /> Serviços mais procurados (90 dias)
         </h2>
         {topServices.length === 0 ? (
           <p className="border border-dashed border-border p-8 text-center text-sm text-muted-foreground">

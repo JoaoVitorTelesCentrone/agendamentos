@@ -7,7 +7,7 @@ import {
   CalendarClock,
   Check,
   Users,
-  Scissors,
+  BriefcaseBusiness,
   ChevronLeft,
   ChevronRight,
   X,
@@ -402,7 +402,7 @@ function OnboardingSetup({
           />
           <SetupStep
             done={hasService}
-            icon={Scissors}
+            icon={BriefcaseBusiness}
             label="Cadastrar serviço"
             href="/painel/servicos"
           />

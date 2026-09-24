@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarClock, Clock, Scissors, UserRound } from "lucide-react"
+import { CalendarClock, Clock, BriefcaseBusiness, UserRound } from "lucide-react"
 
 import { Badge } from "@workspace/ui/components/badge"
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
@@ -381,7 +381,7 @@ function AppointmentCard({
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-1.5">
-            <Scissors className="size-3.5 shrink-0" />
+            <BriefcaseBusiness className="size-3.5 shrink-0" />
             <span className={dense ? "min-w-0 truncate" : "min-w-0 line-clamp-2"}>
               {appt.services?.name ?? "Servico"} - {appt.professionals?.name ?? "Profissional"}
             </span>

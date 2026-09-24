@@ -35,7 +35,7 @@ export async function updateAppointmentStatus(id: string, status: ApptStatus) {
 }
 
 // Cria um agendamento manualmente pelo painel (recepção/dono).
-// Não exige OTP — quem cria é o próprio salão.
+// Não exige OTP — quem cria é a própria equipe do negócio.
 export async function createAppointment(input: {
   serviceId: string
   professionalId: string
@@ -94,7 +94,7 @@ export async function createAppointment(input: {
       service_id: input.serviceId,
       starts_at: start.toISOString(),
       ends_at: end.toISOString(),
-      status: "confirmado", // criado pelo salão já entra confirmado
+      status: "confirmado", // criado pela equipe já entra confirmado
       source: "manual",
       price_cents: service.price_cents,
     })

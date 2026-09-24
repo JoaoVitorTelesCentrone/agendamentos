@@ -1,5 +1,5 @@
 ﻿import Link from "next/link"
-import { Scissors } from "lucide-react"
+import { CalendarDays } from "lucide-react"
 
 import { requireContext } from "@/lib/tenant"
 import { DEFAULT_BRAND } from "@/lib/themes"
@@ -32,7 +32,7 @@ export default async function PainelLayout({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={tenant.logo_url} alt={tenant.name} className="size-full object-cover" />
               ) : (
-                <Scissors className="size-4" />
+                <CalendarDays className="size-4" />
               )}
             </span>
             <span className="font-heading text-lg font-semibold tracking-tight">

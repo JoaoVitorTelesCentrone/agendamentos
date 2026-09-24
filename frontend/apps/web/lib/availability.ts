@@ -1,7 +1,7 @@
 // Cálculo de horários disponíveis.
 //
-// Simplificação de MVP: assume fuso fixo do salão (America/Sao_Paulo, sem DST →
-// offset -03:00). Quando houver salões em outros fusos, guardar timezone no tenant
+// Simplificação de MVP: assume fuso fixo do negócio (America/Sao_Paulo, sem DST →
+// offset -03:00). Para operar em outros fusos, ler o timezone do tenant
 // e usar Intl/Temporal aqui.
 
 const TZ_OFFSET = "-03:00"

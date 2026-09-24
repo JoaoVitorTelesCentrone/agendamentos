@@ -8,9 +8,9 @@
 @source "../**/*.{ts,tsx}";
 
 /* ----------------------------------------------------------------------------
-   VÍVIO — identidade
-   Papel claro quente + verde-tinta. A marca é "te mostro dinheiro": valores em
-   R$ usam sempre o mesmo tratamento (número tabular + --money).
+   AgendaFlow — identidade
+   Papel claro quente + verde-tinta: uma base acolhedora e transversal a áreas
+   de serviço. Valores em R$ mantêm numerais tabulares e o token --money.
 ---------------------------------------------------------------------------- */
 
 :root {

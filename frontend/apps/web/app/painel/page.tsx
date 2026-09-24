@@ -1,6 +1,6 @@
 ﻿import Link from "next/link"
 import {
-  Scissors,
+  BriefcaseBusiness,
   Users,
   CalendarCheck,
   Link2,
@@ -29,7 +29,7 @@ export default async function PainelPage() {
 
   const checklist = [
     {
-      icon: Scissors,
+      icon: BriefcaseBusiness,
       label: "Cadastrar servicos",
       desc: "Nome, duracao e preco de cada servico.",
       href: "/painel/servicos",
@@ -52,7 +52,7 @@ export default async function PainelPage() {
     {
       icon: Link2,
       label: "Publicar seu link",
-      desc: `vivio.app/${tenant.slug}/public`,
+      desc: `/${tenant.slug}/public`,
       href: `/${tenant.slug}/public`,
       done: hasServices && hasProfessionals,
     },
@@ -67,7 +67,7 @@ export default async function PainelPage() {
         Bem-vindo, {tenant.name}
       </h1>
       <p className="mt-2 max-w-md text-muted-foreground">
-        Complete o checklist abaixo para colocar seu salao no ar.
+        Complete o checklist abaixo para publicar sua agenda e começar a receber atendimentos.
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_22rem]">
@@ -108,7 +108,7 @@ export default async function PainelPage() {
           subtitle="Proximos passos"
           activities={[
             {
-              icon: <Scissors className="size-4" />,
+              icon: <BriefcaseBusiness className="size-4" />,
               title: "Servicos",
               desc: hasServices ? "Catalogo configurado" : "Cadastre seu primeiro servico",
               time: hasServices ? "ok" : "agora",

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Scissors } from "lucide-react"
+import { CalendarDays } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-provider"
 
 export function AuthShell({
@@ -21,9 +21,9 @@ export function AuthShell({
         <div className="pointer-events-none absolute -right-20 top-20 size-72 rounded-full bg-warm/30 blur-3xl" />
         <Link href="/" className="flex items-center gap-2">
           <span className="relative flex size-9 items-center justify-center rounded-xl bg-primary-foreground text-primary shadow-lg">
-            <Scissors className="size-4" />
+            <CalendarDays className="size-4" />
           </span>
-          <span className="font-heading text-lg tracking-tight">VÍVIO</span>
+          <span className="font-heading text-lg tracking-tight">AgendaFlow</span>
         </Link>
         <div className="relative max-w-sm">
           <p className="font-heading text-3xl leading-tight tracking-tight text-balance">
@@ -31,12 +31,11 @@ export function AuthShell({
             WhatsApp.”
           </p>
           <p className="mt-4 text-sm text-primary-foreground/70">
-            O jeito mais simples de organizar agendamentos de salões e
-            barbearias.
+            Um jeito mais leve de organizar atendimentos, clientes e horários.
           </p>
         </div>
         <p className="text-xs tracking-widest text-primary-foreground/50 uppercase">
-          Para salões e barbearias
+          Para quem trabalha com hora marcada
         </p>
       </aside>
 
@@ -47,9 +46,9 @@ export function AuthShell({
           <div className="relative mb-8 flex items-center justify-between lg:hidden">
           <Link href="/" className="flex items-center gap-2">
             <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
-              <Scissors className="size-4" />
+              <CalendarDays className="size-4" />
             </span>
-            <span className="font-heading text-lg tracking-tight">VÍVIO</span>
+            <span className="font-heading text-lg tracking-tight">AgendaFlow</span>
           </Link>
           <ThemeToggle />
           </div>

@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BellRing,
+  BriefcaseBusiness,
   Brush,
   CalendarClock,
   CalendarX2,
@@ -13,6 +14,7 @@ import {
   Clock,
   Coins,
   Dumbbell,
+  GraduationCap,
   Footprints,
   Gem,
   HelpCircle,
@@ -22,6 +24,7 @@ import {
   MousePointerClick,
   NotebookPen,
   Phone,
+  PawPrint,
   Scissors,
   Smartphone,
   Sparkles,
@@ -74,6 +77,10 @@ const QUESTIONS: Question[] = [
       { value: "studio", label: "Studio de unhas, cílios ou sobrancelha", icon: Gem },
       { value: "saude", label: "Consultório (nutri, psi, fisio…)", icon: Stethoscope },
       { value: "fitness", label: "Personal / fitness", icon: Dumbbell },
+      { value: "pets", label: "Serviços para pets", icon: PawPrint },
+      { value: "educacao", label: "Aulas e educação", icon: GraduationCap },
+      { value: "consultoria", label: "Consultoria e serviços profissionais", icon: BriefcaseBusiness },
+      { value: "reparos", label: "Reparos e serviços técnicos", icon: Store },
       { value: "outro", label: "Outro", icon: Store },
     ],
   },
@@ -106,7 +113,7 @@ const QUESTIONS: Question[] = [
     id: "ticket",
     eyebrow: "Seu preço",
     title: "Quanto entra, em média, por cliente atendido?",
-    subtitle: "É esse número que transforma cadeira vazia em prejuízo.",
+    subtitle: "É esse número que ajuda a entender o impacto dos horários vagos.",
     options: [
       { value: "ate_50", label: "Até R$ 50", icon: Coins },
       { value: "50_100", label: "R$ 50 a R$ 100", icon: Coins },
@@ -214,7 +221,7 @@ export function QuizClient() {
             href="/"
             className="font-[family-name:var(--font-heading)] text-lg font-bold tracking-tight"
           >
-            VÍVIO
+            AgendaFlow
           </Link>
           <div className="relative h-px flex-1 bg-border">
             <div
@@ -480,8 +487,8 @@ function Result({
             Sua agenda está saudável — e isso é raro.
           </h2>
           <p className="mt-4 leading-relaxed text-muted-foreground">
-            Pelas suas respostas, você perde pouco com falta e cadeira vazia. O
-            que a VÍVIO te devolve aqui não é dinheiro: são{" "}
+            Pelas suas respostas, você perde pouco com faltas e horários vagos. O
+            que o AgendaFlow pode devolver aqui não é dinheiro: são{" "}
             <span className="font-medium text-foreground">
               {diagnosis.whatsappHoursSaved} horas por mês
             </span>{" "}
@@ -550,11 +557,11 @@ function Result({
         </p>
       </div>
 
-      {/* 4. A virada: o que a VÍVIO faz com cada alavanca. */}
+      {/* 4. A virada: o que o AgendaFlow faz com cada alavanca. */}
       <div className="mt-14">
         <Eyebrow>A virada</Eyebrow>
         <h3 className="mt-3 font-[family-name:var(--font-heading)] text-[1.6rem] leading-tight font-bold tracking-tight text-balance sm:text-3xl">
-          O que a VÍVIO faz com cada um desses buracos
+          Como o AgendaFlow ajuda a cuidar desses pontos
         </h3>
         <p className="mt-3 leading-relaxed text-muted-foreground">
           Não é gráfico bonito. É o painel te dizendo o que fazer hoje — e o
@@ -594,14 +601,14 @@ function Result({
           <div className="mt-4 grid gap-5 sm:grid-cols-2">
             <div>
               <p className="text-sm text-muted-foreground">
-                A VÍVIO te devolve, por mês
+                O AgendaFlow pode recuperar, por mês
               </p>
               <p className="mt-1 font-[family-name:var(--font-heading)] text-3xl font-bold tracking-tight tabular-nums text-money">
                 {formatBRL(diagnosis.recoveredMonthlyCents)}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">A VÍVIO custa</p>
+              <p className="text-sm text-muted-foreground">O AgendaFlow custa</p>
               <p className="mt-1 font-[family-name:var(--font-heading)] text-3xl font-bold tracking-tight tabular-nums">
                 {formatBRL(PLAN_PRICE_CENTS)}
                 <span className="text-base font-normal text-muted-foreground">
@@ -613,8 +620,8 @@ function Result({
 
           <p className="mt-6 border-t border-primary/20 pt-5 text-sm leading-relaxed text-pretty">
             {breakEven === 1
-              ? "Um único cliente que deixa de furar no mês já paga a VÍVIO inteira."
-              : `Bastam ${breakEven} clientes que deixam de furar no mês para a VÍVIO se pagar.`}{" "}
+              ? "Um único atendimento recuperado no mês já pode pagar o AgendaFlow."
+              : `Bastam ${breakEven} atendimentos recuperados no mês para o AgendaFlow se pagar.`}{" "}
             O resto é seu:{" "}
             <span className="font-medium tabular-nums text-money">
               {formatBRL(ganhoAno)}
@@ -640,7 +647,7 @@ function Result({
       {/* pb: a barra fixa não pode cobrir a ressalva das estimativas */}
       <p className="mt-8 pb-20 text-center text-xs leading-relaxed text-muted-foreground">
         Os valores são estimativas, calculadas a partir das suas respostas e
-        arredondadas para baixo. No painel, a VÍVIO troca a estimativa pelo seu
+        arredondadas para baixo. No painel, o AgendaFlow troca a estimativa pelo seu
         número real — o dos seus agendamentos.
       </p>
     </div>

@@ -37,7 +37,7 @@ export async function POST(
 
   const tenant = await getPublicTenant(slug)
   if (!tenant) {
-    return NextResponse.json({ error: "Salão não encontrado." }, { status: 404 })
+    return NextResponse.json({ error: "Negócio não encontrado." }, { status: 404 })
   }
 
   const admin = createAdminClient()
